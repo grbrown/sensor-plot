@@ -1,5 +1,6 @@
 import { Plots } from "~/welcome/plots";
 import type { Route } from "./+types/home";
+import { PlotsTwo } from "~/welcome/plots-two";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,5 +10,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Plots></Plots>;
+  return <PlotsTwo></PlotsTwo>;
 }
