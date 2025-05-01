@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import { data } from "react-router";
+import "uplot/dist/uPlot.min.css";
 
 const dummyPlugin = (): uPlot.Plugin => ({
   hooks: {

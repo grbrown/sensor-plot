@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import { data } from "react-router";
+import "uplot/dist/uPlot.min.css";
 
 export function PlotsThree() {
   const [options, setOptions] = useState<uPlot.Options>(
@@ -27,11 +28,16 @@ export function PlotsThree() {
       []
     )
   );
-  const data: uPlot.AlignedData = [
-    //[1746070048.405, 1746070049.406, 1746070050.406],
-    [1, 2, 3],
-    [58.046204, 57.848854, 57.390514],
-  ];
+
+  const initialState = useMemo<uPlot.AlignedData>(
+    () => [
+      [1, 2, 3],
+      [58.046204, 57.848854, 57.390514],
+    ],
+    []
+  );
+  const [data, setData] = useState<uPlot.AlignedData>(initialState);
+
   return (
     <div>
       <UPlotReact
