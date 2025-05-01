@@ -59,7 +59,7 @@ export default function Home() {
   }
 
   const dataX = producer1Data?.reduce((acc, curr) => {
-    const unixTs = new Date(curr["timestamp"]).getTime();
+    const unixTs = new Date(curr["timestamp"]).getTime() / 1000;
     acc.push(unixTs);
     return acc;
   }, []);
