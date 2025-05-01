@@ -10,5 +10,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <PlotsTwo></PlotsTwo>;
+  return <Plots></Plots>;
 }
