@@ -4,46 +4,38 @@ import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import { data } from "react-router";
 
-const dummyPlugin = (): uPlot.Plugin => ({
-  hooks: {
-    init(u: uPlot, opts: uPlot.Options) {
-      void u;
-      void opts;
-    },
-  },
-});
 export function PlotsThree() {
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
         title: "Chart",
-        width: 600,
-        height: 600,
+        width: 300,
+        height: 400,
         series: [
           {
             label: "Date",
           },
           {
-            label: "",
-            points: { show: false },
+            label: "Sensor",
+            points: { show: true }, // Show points for better hover interaction
             stroke: "blue",
-            fill: "blue",
+            fill: "rgba(0, 0, 255, 0.1)", // Semi-transparent fill
+            width: 2, // Line width
           },
         ],
-        plugins: [dummyPlugin()],
-        scales: { x: { time: true }, y: { auto: false, range: [-100, 100] } },
       }),
       []
     )
   );
-  const data = [
-    [1746070048.405, 1746070049.406, 1746070050.406],
+  const data: uPlot.AlignedData = [
+    //[1746070048.405, 1746070049.406, 1746070050.406],
+    [1, 2, 3],
     [58.046204, 57.848854, 57.390514],
   ];
   return (
     <div>
       <UPlotReact
-        key="hooks-key"
+        key="hooks-key2"
         options={options}
         data={data}
         //target={root}
