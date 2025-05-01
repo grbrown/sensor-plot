@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useProducer(id: string) {
+  const [producerBatchData, setProducerBatchData] = useState<any>();
   useEffect(() => {
     // fetch("http://localhost:8000/")
     //   .then((data) => data.text())
@@ -14,7 +15,9 @@ export function useProducer(id: string) {
 
     socket.onmessage = (event) => {
       console.log("Message from producer:", id);
-      console.log(JSON.parse(event.data));
+      const dataArray = JSON.parse(event.data);
+      console.log(dataArray);
+      setProducerBatchData(dataArray);
       socket.close();
     };
 
@@ -22,4 +25,5 @@ export function useProducer(id: string) {
       console.log("WebSocket disconnected");
     };
   }, []);
+  return producerBatchData;
 }
