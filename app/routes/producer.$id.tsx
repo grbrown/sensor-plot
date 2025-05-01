@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import type { LoaderFunctionArgs } from "react-router";
 import uPlot from "uplot";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
@@ -14,7 +15,8 @@ const dummyPlugin = (): uPlot.Plugin => ({
 
 //const root: HTMLElement = document.querySelector("#graph")!;
 
-export default function Producer() {
+export default function Producer({ params }: LoaderFunctionArgs) {
+  console.log(params);
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
