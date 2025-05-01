@@ -13,6 +13,15 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+const dummyPlugin = (): uPlot.Plugin => ({
+  hooks: {
+    init(u: uPlot, opts: uPlot.Options) {
+      void u;
+      void opts;
+    },
+  },
+});
+
 export default function Home() {
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
@@ -22,42 +31,21 @@ export default function Home() {
         height: 300,
         series: [
           {
-            label: "Date",
+            label: "Time",
           },
           {
-            label: "",
-            points: { show: false },
+            label: "Value",
+            points: { show: true },
             stroke: "blue",
             fill: "blue",
           },
         ],
-        plugins: [],
+        plugins: [dummyPlugin()],
         scales: { x: { time: true } },
       }),
       []
     )
   );
-  // useEffect(() => {
-  //   // fetch("http://localhost:8000/")
-  //   //   .then((data) => data.text())
-  //   //   .then((data) => console.log(data));
-  //   const socket = new WebSocket("ws://localhost:8000/producer/1");
-
-  //   socket.onopen = () => {
-  //     console.log("WebSocket connected");
-  //     socket.send("Hello Server!");
-  //   };
-
-  //   socket.onmessage = (event) => {
-  //     console.log("Message from server:", event.data);
-  //     socket.close();
-  //   };
-
-  //   socket.onclose = () => {
-  //     console.log("WebSocket disconnected");
-  //   };
-
-  // }, []);
   const producer1Data = useProducer("1");
   // useProducer("2");
   // useProducer("3");
@@ -65,6 +53,11 @@ export default function Home() {
   // if (producer1Data !== undefined) {
   //   debugger;
   // }
+
+  if (producer1Data === undefined) {
+    return <div>loading...</div>;
+  }
+
   const dataX = producer1Data?.reduce((acc, curr) => {
     const unixTs = new Date(curr["timestamp"]).getTime();
     acc.push(unixTs);
@@ -76,7 +69,7 @@ export default function Home() {
   }, []);
 
   const data = [dataX, dataY];
-  return producer1Data !== undefined ? (
+  return (
     <UPlotReact
       key="hooks-key"
       options={options}
@@ -85,7 +78,5 @@ export default function Home() {
       onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
       onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
     />
-  ) : (
-    <div>loading...</div>
   );
 }
