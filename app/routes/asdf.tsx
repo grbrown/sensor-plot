@@ -1,3 +1,5 @@
+import { Plots } from "~/welcome/plots";
+
 export default function Asdf() {
-  return <div>asdasd</div>;
+  return <Plots></Plots>;
 }

@@ -17,21 +17,21 @@ export function PlotsTwo() {
     useMemo(
       () => ({
         title: "Chart",
-        width: 400,
-        height: 300,
+        width: 600,
+        height: 600,
         series: [
           {
-            label: "Time",
+            label: "Date",
           },
           {
-            label: "Value",
+            label: "",
             points: { show: false },
             stroke: "blue",
             fill: "blue",
           },
         ],
         plugins: [dummyPlugin()],
-        scales: { x: { time: true } },
+        scales: { x: { time: true }, y: { auto: false, range: [-100, 100] } },
       }),
       []
     )
@@ -83,13 +83,15 @@ export function PlotsTwo() {
     ],
   ];
   return (
-    <UPlotReact
-      key="hooks-key"
-      options={options}
-      data={data}
-      //target={root}
-      onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
-      onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
-    />
+    <div>
+      <UPlotReact
+        key="hooks-key"
+        options={options}
+        data={data}
+        //target={root}
+        onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
+        onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
+      />
+    </div>
   );
 }
