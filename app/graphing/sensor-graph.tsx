@@ -23,7 +23,9 @@ export type SensorGraphProps = {
 
 export function SensorGraph({ sensorNum }: SensorGraphProps) {
   const colorScheme = useColorScheme();
-  const color = colorScheme ? darkColors[sensorNum] : lightColors[sensorNum];
+  const color = colorScheme
+    ? darkColors[sensorNum - 1]
+    : lightColors[sensorNum - 1];
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({

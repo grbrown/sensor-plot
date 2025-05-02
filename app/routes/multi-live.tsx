@@ -4,5 +4,12 @@ import { PlotsThree } from "~/welcome/plots-three";
 import { PlotsTwo } from "~/welcome/plots-two";
 
 export default function MultiLive() {
-  return <SensorGraph sensorNum={1}></SensorGraph>;
+  const oneToTen = [...Array(10)].map((_, i) => i + 1);
+  return (
+    <div>
+      {oneToTen.map((i) => (
+        <SensorGraph key={i} sensorNum={i} />
+      ))}
+    </div>
+  );
 }
