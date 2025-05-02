@@ -30,9 +30,12 @@ export const convertMultiProducerDataToUPlotArray = (
     dataY.push(sensorDataY);
   }
 
-  for (var i = 0; i < producerData.length; i++) {
+  for (var i = producerData.length - 1; i >= 0; i--) {
     const graphLen = canonicalXPoints.length;
     const curr = producerData[i][graphLen - 1];
+    if (curr === undefined) {
+      break;
+    }
     const currCanonicalTs = canonicalXPoints[graphLen - 1];
     const currTs = new Date(curr.timestamp).getTime() / 1000;
     const currTsError = currTs - currCanonicalTs;
