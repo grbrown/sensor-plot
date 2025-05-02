@@ -23,7 +23,7 @@ export type SensorGraphProps = {
 };
 
 export function MultiSensorGraph({ live }: SensorGraphProps) {
-  const oneToTen = [...Array(5)].map((_, i) => i + 1);
+  const oneToTen = [...Array(10)].map((_, i) => i + 1);
   const colorScheme = useColorScheme();
 
   const [options, setOptions] = useState<uPlot.Options>(
@@ -53,12 +53,22 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const producer3Data = useProducer("3", live);
   const producer4Data = useProducer("4", live);
   const producer5Data = useProducer("5", live);
+  const producer6Data = useProducer("6", live);
+  const producer7Data = useProducer("7", live);
+  const producer8Data = useProducer("8", live);
+  const producer9Data = useProducer("9", live);
+  const producer10Data = useProducer("10", live);
   const producersData = [
     producer1Data,
     producer2Data,
     producer3Data,
     producer4Data,
     producer5Data,
+    producer6Data,
+    producer7Data,
+    producer8Data,
+    producer9Data,
+    producer10Data,
   ];
   // useProducer("2");
   // useProducer("3");
