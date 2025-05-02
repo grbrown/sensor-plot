@@ -5,6 +5,7 @@ import "uplot/dist/uPlot.min.css";
 import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { darkColors, lightColors } from "~/constants/colors";
+import { convertMultiProducerDataToUPlotArray } from "~/util/convertMultiProducerDataToUPlotArray";
 
 const loadStartTime = performance.now();
 
@@ -21,11 +22,10 @@ export type SensorGraphProps = {
   live?: boolean;
 };
 
-export function SensorGraph({ live }: SensorGraphProps) {
+export function MultiSensorGraph({ live }: SensorGraphProps) {
+  const oneToTen = [...Array(5)].map((_, i) => i + 1);
   const colorScheme = useColorScheme();
-  const color = colorScheme
-    ? darkColors[sensorNum - 1]
-    : lightColors[sensorNum - 1];
+
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
@@ -36,11 +36,11 @@ export function SensorGraph({ live }: SensorGraphProps) {
           {
             label: "Time",
           },
-          {
-            label: "Value",
+          ...oneToTen.map((i) => ({
+            label: "Value" + i,
             points: { show: false },
-            stroke: color,
-          },
+            stroke: colorScheme ? darkColors[i - 1] : lightColors[i - 1],
+          })),
         ],
         plugins: [dummyPlugin()],
         scales: { x: { time: true } },
@@ -48,7 +48,18 @@ export function SensorGraph({ live }: SensorGraphProps) {
       []
     )
   );
-  const producer1Data = useProducer(String(sensorNum), live);
+  const producer1Data = useProducer("1", live);
+  const producer2Data = useProducer("2", live);
+  const producer3Data = useProducer("3", live);
+  const producer4Data = useProducer("4", live);
+  const producer5Data = useProducer("5", live);
+  const producersData = [
+    producer1Data,
+    producer2Data,
+    producer3Data,
+    producer4Data,
+    producer5Data,
+  ];
   // useProducer("2");
   // useProducer("3");
   // useProducer("4");
@@ -63,7 +74,7 @@ export function SensorGraph({ live }: SensorGraphProps) {
     (1000 * producer1Data.length) / (dataSamplingTime - loadStartTime)
   );
 
-  const data = convertProducerDataToUPlotArray(producer1Data);
+  const data = convertMultiProducerDataToUPlotArray(producersData);
 
   return (
     <UPlotReact
