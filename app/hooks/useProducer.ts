@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useProducer(id: string) {
+export function useProducer(id: string, live: boolean = false) {
   const [producerBatchData, setProducerBatchData] = useState<any>();
   useEffect(() => {
     // fetch("http://localhost:8000/")
@@ -16,9 +16,19 @@ export function useProducer(id: string) {
     socket.onmessage = (event) => {
       console.log("Message from producer:", id);
       const dataArray = JSON.parse(event.data);
-      console.log(dataArray);
-      setProducerBatchData(dataArray);
-      socket.close();
+      if (!live) {
+        console.log(dataArray);
+      }
+      setProducerBatchData((curr) => {
+        if (curr === undefined) {
+          return dataArray;
+        }
+        return [...curr, ...dataArray];
+      });
+      //close on first message if not live
+      if (live === false) {
+        socket.close();
+      }
     };
 
     socket.onclose = () => {
