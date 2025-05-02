@@ -19,9 +19,10 @@ const dummyPlugin = (): uPlot.Plugin => ({
 
 export type SensorGraphProps = {
   sensorNum: number;
+  live?: boolean;
 };
 
-export function SensorGraph({ sensorNum }: SensorGraphProps) {
+export function SensorGraph({ sensorNum, live }: SensorGraphProps) {
   const colorScheme = useColorScheme();
   const color = colorScheme
     ? darkColors[sensorNum - 1]
@@ -48,7 +49,7 @@ export function SensorGraph({ sensorNum }: SensorGraphProps) {
       []
     )
   );
-  const producer1Data = useProducer(String(sensorNum), true);
+  const producer1Data = useProducer(String(sensorNum), live);
   // useProducer("2");
   // useProducer("3");
   // useProducer("4");

@@ -8,7 +8,7 @@ export default function MultiLive() {
   return (
     <div>
       {oneToTen.map((i) => (
-        <SensorGraph key={i} sensorNum={i} />
+        <SensorGraph key={i} sensorNum={i} live={false} />
       ))}
     </div>
   );
