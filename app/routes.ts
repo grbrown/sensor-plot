@@ -5,6 +5,7 @@ export default [
   route("/asdf", "routes/asdf.tsx"),
   route("/live", "routes/live.tsx"),
   route("/multi-live", "routes/multi-live.tsx"),
+  route("/multi-sensor-live", "routes/multi-sensor-live.tsx"),
   route("/hardcoded", "routes/hardcoded.tsx"),
   route("producer/:id", "routes/producer.$id.tsx"), // Dynamic route ("/producer/:id")
 ] satisfies RouteConfig;
