@@ -26,9 +26,8 @@ export function Plots() {
           },
           {
             label: "Value",
-            points: { show: true },
+            points: { show: false },
             stroke: "blue",
-            fill: "blue",
           },
         ],
         plugins: [dummyPlugin()],
