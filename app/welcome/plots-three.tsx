@@ -20,7 +20,12 @@ export function PlotsThree() {
             label: "Sensor",
             points: { show: true }, // Show points for better hover interaction
             stroke: "blue",
-            fill: "rgba(0, 0, 255, 0.1)", // Semi-transparent fill
+            width: 2, // Line width
+          },
+          {
+            label: "Sensor2",
+            points: { show: true }, // Show points for better hover interaction
+            stroke: "red",
             width: 2, // Line width
           },
         ],
@@ -32,7 +37,8 @@ export function PlotsThree() {
   const initialState = useMemo<uPlot.AlignedData>(
     () => [
       [1, 2, 3],
-      [58.046204, 57.848854, 57.390514],
+      [58.046204, 59.848854, 58.390514],
+      [70.046204, 47.848854, 47.390514],
     ],
     []
   );
