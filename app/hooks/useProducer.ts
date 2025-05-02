@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 
+export type ProducerData = { timestamp: string; value: number };
+
 export function useProducer(id: string, live: boolean = false) {
-  const [producerBatchData, setProducerBatchData] = useState<any>();
+  const [producerBatchData, setProducerBatchData] = useState<ProducerData[]>(
+    []
+  );
   useEffect(() => {
     // fetch("http://localhost:8000/")
     //   .then((data) => data.text())
@@ -20,9 +24,6 @@ export function useProducer(id: string, live: boolean = false) {
         console.log(dataArray);
       }
       setProducerBatchData((curr) => {
-        if (curr === undefined) {
-          return dataArray;
-        }
         return [...curr, ...dataArray];
       });
       //close on first message if not live
