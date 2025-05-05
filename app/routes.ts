@@ -1,3 +1,11 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+export default [
+  index("routes/home.tsx"),
+  route("/asdf", "routes/asdf.tsx"),
+  route("/live", "routes/live.tsx"),
+  route("/multi-live", "routes/multi-live.tsx"),
+  route("/multi-sensor-live", "routes/multi-sensor-live.tsx"),
+  route("/hardcoded", "routes/hardcoded.tsx"),
+  route("producer/:id", "routes/producer.$id.tsx"), // Dynamic route ("/producer/:id")
+] satisfies RouteConfig;
