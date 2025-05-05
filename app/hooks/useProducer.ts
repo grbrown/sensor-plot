@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const MAXIMUM_POINT_WINDOW = 100;
+
 export type ProducerData = { timestamp: string; value: number };
 
 export function useProducer(id: string, live: boolean = false) {
@@ -24,6 +26,24 @@ export function useProducer(id: string, live: boolean = false) {
         console.log(dataArray);
       }
       setProducerBatchData((curr) => {
+        const newLength = curr.length + dataArray.length;
+        if (newLength > MAXIMUM_POINT_WINDOW) {
+          const excess = newLength - MAXIMUM_POINT_WINDOW;
+          const pointDropInterval = Math.ceil(newLength / excess);
+          const expectedDroppedPoints = Math.floor(
+            newLength / pointDropInterval
+          );
+          const ret = [...new Array(newLength - expectedDroppedPoints)];
+          let retIndex = 0;
+          for (let i = 0; i < newLength; i++) {
+            if (i % pointDropInterval !== 0) {
+              ret[retIndex] =
+                i < curr.length ? curr[i] : dataArray[i - curr.length];
+              retIndex++;
+            }
+          }
+          return ret;
+        }
         return [...curr, ...dataArray];
       });
       //close on first message if not live
