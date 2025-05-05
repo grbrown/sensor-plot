@@ -80,7 +80,7 @@ export function PlotsThree() {
   }, []);
 
   return (
-    <div className="w-[100%] h-[85vh]" ref={chartRef}>
+    <div style={{ width: "100%", height: "85vh" }} ref={chartRef}>
       <UPlotReact
         key="hooks-key2"
         options={options}
