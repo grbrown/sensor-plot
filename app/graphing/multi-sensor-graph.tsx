@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
@@ -178,8 +178,24 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     return Math.sqrt(variance);
   });
 
+  useEffect(() => {
+    if (zoomEnabled === true) {
+      setOptions((prev) => ({
+        ...prev,
+        width: prev.width - 300,
+      }));
+    }
+  }, [zoomEnabled]);
+
   return (
-    <div>
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "nowrap",
+      }}
+    >
       <AutoResizeUPlotReact
         key="hooks-key"
         setOptions={setOptions}
@@ -189,33 +205,33 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
         onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
       />
-      <br></br>
-      <br></br>
-      <br></br>
-      <br></br>
       {zoomEnabled && (
-        <table className="overflow-x-scroll">
-          <tr>
-            <th>Producer</th>
-            <th>Avg</th>
-          </tr>
-          {averages?.map((avg, i) => (
+        <div className="w-[400px]">
+          <button
+            onClick={() => {
+              needsZoomReset.current = true;
+              setOptions((prev) => ({
+                ...prev,
+                width: prev.width + 300,
+              }));
+            }}
+          >
+            Reset zoom
+          </button>
+          <table className="overflow-x-scroll">
             <tr>
-              <th>Sensor {i}</th>
-              <td key={i}>{avg}</td>
+              <th>Producer</th>
+              <th>Avg</th>
             </tr>
-          ))}
-        </table>
+            {averages?.map((avg, i) => (
+              <tr>
+                <th>Sensor {i}</th>
+                <td key={i}>{avg}</td>
+              </tr>
+            ))}
+          </table>
+        </div>
       )}
-      <br></br>
-
-      <button
-        onClick={() => {
-          needsZoomReset.current = true;
-        }}
-      >
-        Reset zoom
-      </button>
     </div>
   );
 }
