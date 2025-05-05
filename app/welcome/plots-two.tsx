@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
+import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
 
 const dummyPlugin = (): uPlot.Plugin => ({
   hooks: {
@@ -131,10 +132,11 @@ export function PlotsTwo() {
     ],
   ];
   return (
-    <UPlotReact
+    <AutoResizeUPlotReact
       key="hooks-key"
       //className="w-[1080px] h-[600px]"
       options={options}
+      setOptions={setOptions}
       data={data}
       //target={root}
       onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
