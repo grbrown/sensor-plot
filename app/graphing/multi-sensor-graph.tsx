@@ -218,7 +218,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           >
             Reset zoom
           </button>
-          <table className="overflow-x-scroll">
+          <table>
             <tr>
               <th>Producer</th>
               <th>Avg</th>
@@ -226,7 +226,31 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             {averages?.map((avg, i) => (
               <tr>
                 <th>Sensor {i}</th>
-                <td key={i}>{avg}</td>
+                <td key={i}>{avg.toFixed(4)}</td>
+              </tr>
+            ))}
+          </table>
+          <table>
+            <tr>
+              <th>Producer</th>
+              <th>Min</th>
+            </tr>
+            {minimums?.map((minimum, i) => (
+              <tr>
+                <th>Sensor {i}</th>
+                <td key={i}>{minimum.toFixed(4)}</td>
+              </tr>
+            ))}
+          </table>
+          <table>
+            <tr>
+              <th>Producer</th>
+              <th>Maximum</th>
+            </tr>
+            {maximums?.map((maximum, i) => (
+              <tr>
+                <th>Sensor {i}</th>
+                <td key={i}>{maximum.toFixed(4)}</td>
               </tr>
             ))}
           </table>
