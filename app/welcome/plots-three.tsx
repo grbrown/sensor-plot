@@ -1,5 +1,5 @@
 import { Welcome } from "./welcome";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import { data } from "react-router";
@@ -44,8 +44,43 @@ export function PlotsThree() {
   );
   const [data, setData] = useState<uPlot.AlignedData>(initialState);
 
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const { width, height } = chartRef.current.getBoundingClientRect();
+      setDimensions({ width, height });
+
+      // Update chart options with the container size
+      setOptions((prev) => ({
+        ...prev,
+        width,
+        height,
+      }));
+    }
+
+    // Optional: Add resize listener to update on window resize
+    const handleResize = () => {
+      if (chartRef.current) {
+        const { width, height } = chartRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
+
+        // Update chart options with the new size
+        setOptions((prev) => ({
+          ...prev,
+          width,
+          height,
+        }));
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div>
+    <div className="w-[100%] h-[85vh]" ref={chartRef}>
       <UPlotReact
         key="hooks-key2"
         options={options}
