@@ -162,16 +162,16 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   }
   const plotData = zoomedData ?? data;
 
-  const averages = plotData.slice(1).map((arr) => {
+  const averages = zoomedData?.slice(1).map((arr) => {
     return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
   });
-  const maximums = plotData.slice(1).map((arr) => {
+  const maximums = zoomedData?.slice(1).map((arr) => {
     return Math.max(...arr);
   });
-  const minimums = plotData.slice(1).map((arr) => {
+  const minimums = zoomedData?.slice(1).map((arr) => {
     return Math.min(...arr);
   });
-  const stdDevs = plotData.slice(1).map((arr) => {
+  const stdDevs = zoomedData?.slice(1).map((arr) => {
     const avg = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
     const variance =
       arr.reduce((acc, curr) => acc + (curr - avg) ** 2, 0) / arr.length;
@@ -193,25 +193,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       <br></br>
       <br></br>
       <br></br>
-      <table className="overflow-x-scroll">
-        <tr>
-          <th>Producer</th>
-          <th>Avg</th>
-        </tr>
-        {averages.map((avg, i) => (
+      {zoomEnabled && (
+        <table className="overflow-x-scroll">
           <tr>
-            <th>Sensor {i}</th>
-            <td key={i}>{avg}</td>
+            <th>Producer</th>
+            <th>Avg</th>
           </tr>
-        ))}
-      </table>
-      <div>
-        <h1>avg</h1>
-        <p>
-          {plotData[1].reduce((curr, acc) => acc + curr, 0) /
-            plotData[1].length}
-        </p>
-      </div>
+          {averages?.map((avg, i) => (
+            <tr>
+              <th>Sensor {i}</th>
+              <td key={i}>{avg}</td>
+            </tr>
+          ))}
+        </table>
+      )}
       <br></br>
 
       <button
