@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
@@ -6,6 +6,7 @@ import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPl
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { darkColors, lightColors } from "~/constants/colors";
 import { convertMultiProducerDataToUPlotArray } from "~/util/convertMultiProducerDataToUPlotArray";
+import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
 
 const loadStartTime = performance.now();
 
@@ -26,6 +27,12 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const oneToTen = [...Array(10)].map((_, i) => i + 1);
   const colorScheme = useColorScheme();
 
+  // Track whether we're in a zoomed state
+  const needsZoomReset = useRef(false);
+
+  // Store the current scale state
+  const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
+
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
@@ -44,6 +51,52 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         ],
         plugins: [dummyPlugin()],
         scales: { x: { time: true } },
+        // Add custom handling for auto-ranging to preserve zoom
+        hooks: {
+          // Track when user zooms in
+          setScale: [
+            (u) => {
+              console.log("hook-setScale");
+              // Get x-scale min/max
+              const xScaleMin = u.scales.x.min;
+              const xScaleMax = u.scales.x.max;
+
+              // Get full data range
+              const xData = u.data[0];
+              const dataMin = Math.min(...xData);
+              const dataMax = Math.max(...xData);
+
+              // Check if we're zoomed in (allowing for small floating point differences)
+              const isZoomed =
+                Math.abs(xScaleMin - dataMin) > 0.001 ||
+                Math.abs(xScaleMax - dataMax) > 0.001;
+
+              if (needsZoomReset.current) {
+                needsZoomReset.current = false;
+                scaleStateRef.current = null;
+              } else {
+                if (isZoomed) {
+                  // Save the current scale state
+                  if (!scaleStateRef.current) {
+                    scaleStateRef.current = {
+                      min: xScaleMin,
+                      max: xScaleMax,
+                    };
+                  }
+                }
+              }
+            },
+          ],
+
+          setSelect: [
+            (u) => {
+              console.log("hook-setSelect");
+              if (scaleStateRef.current != null) {
+                scaleStateRef.current = null;
+              }
+            },
+          ],
+        },
       }),
       []
     )
@@ -86,14 +139,51 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
 
   const data = convertMultiProducerDataToUPlotArray(producersData);
 
+  const zoomEnabled = scaleStateRef.current !== null;
+  const zoomedData = (() => {
+    if (needsZoomReset.current) {
+      return data;
+    }
+    if (!zoomEnabled) {
+      return null;
+    }
+    const xScaleMin = scaleStateRef.current!.min;
+    const xScaleMax = scaleStateRef.current!.max;
+    const startPointIndex = data[0].findIndex((x) => x >= xScaleMin);
+    const endPointIndex = data[0].findIndex((x) => x >= xScaleMax);
+    const zoomedData = data.map((arr) =>
+      arr.slice(startPointIndex, endPointIndex)
+    );
+    return zoomedData;
+  })();
+
+  if (zoomedData !== null) {
+    console.log("zoomedData", zoomedData);
+  }
+
   return (
-    <UPlotReact
-      key="hooks-key"
-      options={options}
-      data={data}
-      //target={root}
-      onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
-      onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
-    />
+    <>
+      <AutoResizeUPlotReact
+        key="hooks-key"
+        setOptions={setOptions}
+        options={options}
+        data={zoomedData ?? data}
+        //target={root}
+        onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
+        onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
+      />
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <button
+        onClick={() => {
+          needsZoomReset.current = true;
+        }}
+      >
+        Reset zoom
+      </button>
+    </>
   );
 }
