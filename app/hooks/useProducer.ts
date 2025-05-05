@@ -35,18 +35,21 @@ export function useProducer(id: string, live: boolean = false) {
 
           const ret = [];
           for (let i = 0; i < newLength; i++) {
+            if (i == 0) {
+              ret.push(curr[0]);
+              continue;
+            }
             const currentPoint =
               i < curr.length ? curr[i] : dataArray[i - curr.length];
-            const prevPoint =
-              i - 1 < curr.length
-                ? curr[i - 1]
-                : dataArray[i - curr.length - 1];
+            const prevPoint = ret[ret.length - 1];
             const currTs = new Date(currentPoint.timestamp).getTime();
             const prevTs = new Date(prevPoint.timestamp).getTime();
-            if (i === 0 || Math.abs(currTs - prevTs) > desiredPointDensity) {
+            const timeDelta = Math.abs(currTs - prevTs);
+            if (timeDelta > desiredPointDensity) {
               ret.push(currentPoint);
             } else {
-              console.log(`Producer ${id} dropping point ${currentPoint}`);
+              const a = 1;
+              //console.log(`Producer ${id} dropping point ${currentPoint}`);
             }
           }
 
