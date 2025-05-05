@@ -195,20 +195,15 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       <br></br>
       <table className="overflow-x-scroll">
         <tr>
-          {oneToTen.map((i) => (
-            <th key={i}>
-              <h1>Sensor {i}</h1>
-            </th>
-          ))}
-        </tr>
-        <tr>
+          <th>Producer</th>
           <th>Avg</th>
-          {averages.map((avg, i) => (
-            <td key={i}>
-              <p>{avg}</p>
-            </td>
-          ))}
         </tr>
+        {averages.map((avg, i) => (
+          <tr>
+            <th>Sensor {i}</th>
+            <td key={i}>{avg}</td>
+          </tr>
+        ))}
       </table>
       <div>
         <h1>avg</h1>
