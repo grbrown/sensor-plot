@@ -193,7 +193,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       <br></br>
       <br></br>
       <br></br>
-      <table>
+      <table className="overflow-x-scroll">
         <tr>
           {oneToTen.map((i) => (
             <th key={i}>
