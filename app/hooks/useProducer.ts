@@ -28,20 +28,47 @@ export function useProducer(id: string, live: boolean = false) {
       setProducerBatchData((curr) => {
         const newLength = curr.length + dataArray.length;
         if (newLength > MAXIMUM_POINT_WINDOW) {
-          const excess = newLength - MAXIMUM_POINT_WINDOW;
-          const pointDropInterval = Math.ceil(newLength / excess);
-          const expectedDroppedPoints = Math.floor(
-            newLength / pointDropInterval
-          );
-          const ret = [...new Array(newLength - expectedDroppedPoints)];
-          let retIndex = 0;
+          const msSpan =
+            new Date(dataArray[dataArray.length - 1].timestamp).getTime() -
+            new Date(curr[0].timestamp).getTime();
+          const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
+
+          const ret = [];
           for (let i = 0; i < newLength; i++) {
-            if (i % pointDropInterval !== 0) {
-              ret[retIndex] =
-                i < curr.length ? curr[i] : dataArray[i - curr.length];
-              retIndex++;
+            const currentPoint =
+              i < curr.length ? curr[i] : dataArray[i - curr.length];
+            const prevPoint =
+              i - 1 < curr.length
+                ? curr[i - 1]
+                : dataArray[i - curr.length - 1];
+            const currTs = new Date(currentPoint.timestamp).getTime();
+            const prevTs = new Date(prevPoint.timestamp).getTime();
+            if (i === 0 || Math.abs(currTs - prevTs) > desiredPointDensity) {
+              ret.push(currentPoint);
+            } else {
+              console.log(`Producer ${id} dropping point ${currentPoint}`);
             }
           }
+
+          // console.log(
+          //   `Producer ${id} 's points span ${
+
+          //   }  ms`
+          // );
+          // const excess = newLength - MAXIMUM_POINT_WINDOW;
+          // const pointDropInterval = Math.ceil(newLength / excess);
+          // const expectedDroppedPoints = Math.floor(
+          //   newLength / pointDropInterval
+          // );
+          // const ret = [...new Array(newLength - expectedDroppedPoints)];
+          // let retIndex = 0;
+          // for (let i = 0; i < newLength; i++) {
+          //   if (i % pointDropInterval !== 0) {
+          //     ret[retIndex] =
+          //       i < curr.length ? curr[i] : dataArray[i - curr.length];
+          //     retIndex++;
+          //   }
+          // }
           return ret;
         }
         return [...curr, ...dataArray];
