@@ -160,14 +160,31 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   if (zoomedData !== null) {
     console.log("zoomedData", zoomedData);
   }
+  const plotData = zoomedData ?? data;
+
+  const averages = zoomedData?.slice(1).map((arr) => {
+    return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+  });
+  const maximums = zoomedData?.slice(1).map((arr) => {
+    return Math.max(...arr);
+  });
+  const minimums = zoomedData?.slice(1).map((arr) => {
+    return Math.min(...arr);
+  });
+  const stdDevs = zoomedData?.slice(1).map((arr) => {
+    const avg = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+    const variance =
+      arr.reduce((acc, curr) => acc + (curr - avg) ** 2, 0) / arr.length;
+    return Math.sqrt(variance);
+  });
 
   return (
-    <>
+    <div>
       <AutoResizeUPlotReact
         key="hooks-key"
         setOptions={setOptions}
         options={options}
-        data={zoomedData ?? data}
+        data={plotData}
         //target={root}
         onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
         onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
@@ -176,7 +193,22 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       <br></br>
       <br></br>
       <br></br>
+      {zoomEnabled && (
+        <table className="overflow-x-scroll">
+          <tr>
+            <th>Producer</th>
+            <th>Avg</th>
+          </tr>
+          {averages?.map((avg, i) => (
+            <tr>
+              <th>Sensor {i}</th>
+              <td key={i}>{avg}</td>
+            </tr>
+          ))}
+        </table>
+      )}
       <br></br>
+
       <button
         onClick={() => {
           needsZoomReset.current = true;
@@ -184,6 +216,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       >
         Reset zoom
       </button>
-    </>
+    </div>
   );
 }
