@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const MAXIMUM_POINT_WINDOW = 100;
+const MAXIMUM_POINT_WINDOW = 10000;
 
 export type ProducerData = { timestamp: string; value: number };
 
@@ -28,6 +28,7 @@ export function useProducer(id: string, live: boolean = false) {
       setProducerBatchData((curr) => {
         const newLength = curr.length + dataArray.length;
         if (newLength > MAXIMUM_POINT_WINDOW) {
+          const start = performance.now();
           const msSpan =
             new Date(dataArray[dataArray.length - 1].timestamp).getTime() -
             new Date(curr[0].timestamp).getTime();
@@ -47,31 +48,13 @@ export function useProducer(id: string, live: boolean = false) {
             const timeDelta = Math.abs(currTs - prevTs);
             if (timeDelta > desiredPointDensity) {
               ret.push(currentPoint);
-            } else {
-              const a = 1;
-              //console.log(`Producer ${id} dropping point ${currentPoint}`);
             }
           }
-
-          // console.log(
-          //   `Producer ${id} 's points span ${
-
-          //   }  ms`
-          // );
-          // const excess = newLength - MAXIMUM_POINT_WINDOW;
-          // const pointDropInterval = Math.ceil(newLength / excess);
-          // const expectedDroppedPoints = Math.floor(
-          //   newLength / pointDropInterval
-          // );
-          // const ret = [...new Array(newLength - expectedDroppedPoints)];
-          // let retIndex = 0;
-          // for (let i = 0; i < newLength; i++) {
-          //   if (i % pointDropInterval !== 0) {
-          //     ret[retIndex] =
-          //       i < curr.length ? curr[i] : dataArray[i - curr.length];
-          //     retIndex++;
-          //   }
-          // }
+          const end = performance.now();
+          const timeDiff = end - start;
+          console.log(
+            `Producer ${id} took ${timeDiff}ms to process ${dataArray.length} points`
+          );
           return ret;
         }
         return [...curr, ...dataArray];
