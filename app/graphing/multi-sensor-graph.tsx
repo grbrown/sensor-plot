@@ -221,38 +221,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           <table>
             <tr>
               <th>Producer</th>
+              <th>Min</th>
+              <th>Max</th>
               <th>Avg</th>
             </tr>
-            {averages?.map((avg, i) => (
-              <tr>
-                <th>Sensor {i}</th>
-                <td key={i}>{avg.toFixed(4)}</td>
-              </tr>
-            ))}
-          </table>
-          <table>
-            <tr>
-              <th>Producer</th>
-              <th>Min</th>
-            </tr>
-            {minimums?.map((minimum, i) => (
-              <tr>
-                <th>Sensor {i}</th>
-                <td key={i}>{minimum.toFixed(4)}</td>
-              </tr>
-            ))}
-          </table>
-          <table>
-            <tr>
-              <th>Producer</th>
-              <th>Maximum</th>
-            </tr>
-            {maximums?.map((maximum, i) => (
-              <tr>
-                <th>Sensor {i}</th>
-                <td key={i}>{maximum.toFixed(4)}</td>
-              </tr>
-            ))}
+            {oneToTen.map((index) => {
+              return (
+                <tr>
+                  <th>Producer {index}</th>
+                  <td>{minimums?.[index - 1]?.toFixed(4)}</td>
+                  <td>{maximums?.[index - 1]?.toFixed(4)}</td>
+                  <td>{averages?.[index - 1]?.toFixed(4)}</td>
+                </tr>
+              );
+            })}
           </table>
         </div>
       )}
