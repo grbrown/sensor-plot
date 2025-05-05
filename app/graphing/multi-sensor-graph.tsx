@@ -160,14 +160,31 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   if (zoomedData !== null) {
     console.log("zoomedData", zoomedData);
   }
+  const plotData = zoomedData ?? data;
+
+  const averages = plotData.slice(1).map((arr) => {
+    return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+  });
+  const maximums = plotData.slice(1).map((arr) => {
+    return Math.max(...arr);
+  });
+  const minimums = plotData.slice(1).map((arr) => {
+    return Math.min(...arr);
+  });
+  const stdDevs = plotData.slice(1).map((arr) => {
+    const avg = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+    const variance =
+      arr.reduce((acc, curr) => acc + (curr - avg) ** 2, 0) / arr.length;
+    return Math.sqrt(variance);
+  });
 
   return (
-    <>
+    <div>
       <AutoResizeUPlotReact
         key="hooks-key"
         setOptions={setOptions}
         options={options}
-        data={zoomedData ?? data}
+        data={plotData}
         //target={root}
         onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
         onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
@@ -176,7 +193,32 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       <br></br>
       <br></br>
       <br></br>
+      <table>
+        <tr>
+          {oneToTen.map((i) => (
+            <th key={i}>
+              <h1>Sensor {i}</h1>
+            </th>
+          ))}
+        </tr>
+        <tr>
+          <th>Avg</th>
+          {averages.map((avg, i) => (
+            <td key={i}>
+              <p>{avg}</p>
+            </td>
+          ))}
+        </tr>
+      </table>
+      <div>
+        <h1>avg</h1>
+        <p>
+          {plotData[1].reduce((curr, acc) => acc + curr, 0) /
+            plotData[1].length}
+        </p>
+      </div>
       <br></br>
+
       <button
         onClick={() => {
           needsZoomReset.current = true;
@@ -184,6 +226,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       >
         Reset zoom
       </button>
-    </>
+    </div>
   );
 }
