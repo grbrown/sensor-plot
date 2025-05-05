@@ -1,8 +1,5 @@
-import { Welcome } from "./welcome";
-import { useEffect, useMemo, useState } from "react";
-import { useProducer } from "~/hooks/useProducer";
+import { useMemo, useState } from "react";
 import UPlotReact from "uplot-react";
-import { data } from "react-router";
 import "uplot/dist/uPlot.min.css";
 
 const dummyPlugin = (): uPlot.Plugin => ({
@@ -31,7 +28,57 @@ export function PlotsTwo() {
             fill: "blue",
           },
         ],
-        plugins: [dummyPlugin()],
+        plugins: [
+          // Add a custom plugin to draw statistics on the chart
+          {
+            hooks: {
+              draw: [
+                (u) => {
+                  // Only draw when dimensions are set
+                  //if (!dimensions.width) return;
+                  console.log(u.scales["x"]);
+                  console.log(
+                    u.scales["x"]["min"] + " - " + u.scales["x"]["max"]
+                  );
+                  const minTimescale = u.scales["x"]["min"];
+                  const maxTimescale = u.scales["x"]["max"];
+
+                  const startingPoint = u.data[0].find((d) => d > minTimescale);
+                  const endingPoint = u.data[0].find((d) => d > maxTimescale);
+                  console.log(startingPoint);
+                  console.log(endingPoint);
+                  const min1 = 1;
+                  const min2 = 2;
+                  const max1 = 3;
+                  const max2 = 4;
+                  const avg1 = 5;
+                  const avg2 = 6;
+
+                  const ctx = u.ctx;
+                  ctx.save();
+
+                  // Set text properties
+                  ctx.font = "12px Arial";
+                  ctx.textAlign = "left";
+
+                  // Stats for series 1 (blue)
+                  ctx.fillStyle = "blue";
+                  ctx.fillText(`Min: ${min1.toFixed(2)}`, 10, 20);
+                  ctx.fillText(`Max: ${max1.toFixed(2)}`, 10, 40);
+                  ctx.fillText(`Avg: ${avg1.toFixed(2)}`, 10, 60);
+
+                  // Stats for series 2 (red)
+                  ctx.fillStyle = "red";
+                  ctx.fillText(`Min: ${min2.toFixed(2)}`, 10, 80);
+                  ctx.fillText(`Max: ${max2.toFixed(2)}`, 10, 100);
+                  ctx.fillText(`Avg: ${avg2.toFixed(2)}`, 10, 120);
+
+                  ctx.restore();
+                },
+              ],
+            },
+          },
+        ],
         scales: { x: { time: true }, y: { auto: false, range: [-100, 100] } },
       }),
       []
@@ -84,15 +131,14 @@ export function PlotsTwo() {
     ],
   ];
   return (
-    <div>
-      <UPlotReact
-        key="hooks-key"
-        options={options}
-        data={data}
-        //target={root}
-        onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
-        onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
-      />
-    </div>
+    <UPlotReact
+      key="hooks-key"
+      //className="w-[1080px] h-[600px]"
+      options={options}
+      data={data}
+      //target={root}
+      onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
+      onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
+    />
   );
 }
