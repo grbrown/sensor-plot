@@ -238,13 +238,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   //   debugger;
   // }
 
-  console.log("datapointCount", producer1Data.length);
-  const dataSamplingTime = performance.now();
-  console.log(
-    "DataSamplingRateAvg",
-    (1000 * producer1Data.length) / (dataSamplingTime - loadStartTime)
-  );
-
   const data = convertMultiProducerDataToUPlotArray(producersData);
 
   const zoomEnabled = scaleStateRef.current !== null;
