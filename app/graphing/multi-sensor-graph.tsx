@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useProducer } from "~/hooks/useProducer";
+import { useProducer, type ProducerData } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
@@ -102,27 +102,136 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     )
   );
   const producer1Data = useProducer("1", live);
-  const producer2Data = useProducer("2", live);
-  const producer3Data = useProducer("3", live);
-  const producer4Data = useProducer("4", live);
-  const producer5Data = useProducer("5", live);
-  const producer6Data = useProducer("6", live);
-  const producer7Data = useProducer("7", live);
-  const producer8Data = useProducer("8", live);
-  const producer9Data = useProducer("9", live);
-  const producer10Data = useProducer("10", live);
+
+  const producer1DataRef = useRef<ProducerData[]>([]);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer1DataRef.current = [...producer1DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer2DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer2DataRef.current = [...producer2DataRef.current, ...dataArray];
+    };
+  }, []);
+  const producer3DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer3DataRef.current = [...producer3DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer4DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer4DataRef.current = [...producer4DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer5DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer5DataRef.current = [...producer5DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer6DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer6DataRef.current = [...producer6DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer7DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer7DataRef.current = [...producer7DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer8DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer8DataRef.current = [...producer8DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer9DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer9DataRef.current = [...producer9DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  const producer10DataRef = useRef<ProducerData[]>([]);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  // const producer2Data = useProducer("2", live);
+  // const producer3Data = useProducer("3", live);
+  // const producer4Data = useProducer("4", live);
+  // const producer5Data = useProducer("5", live);
+  // const producer6Data = useProducer("6", live);
+  // const producer7Data = useProducer("7", live);
+  // const producer8Data = useProducer("8", live);
+  // const producer9Data = useProducer("9", live);
+  // const producer10Data = useProducer("10", live);
   const producersData = [
-    producer1Data,
-    producer2Data,
-    producer3Data,
-    producer4Data,
-    producer5Data,
-    producer6Data,
-    producer7Data,
-    producer8Data,
-    producer9Data,
-    producer10Data,
+    producer1DataRef.current,
+    producer2DataRef.current,
+    producer3DataRef.current,
+    producer4DataRef.current,
+    producer5DataRef.current,
+    producer6DataRef.current,
+    producer7DataRef.current,
+    producer8DataRef.current,
+    producer9DataRef.current,
+    producer10DataRef.current,
   ];
+
+  if (producersData.find((pd) => producersData[0].length !== pd.length)) {
+    console.log("Not all producers have the same length");
+    producersData.forEach((pd2) => {
+      console.log(pd2.length);
+    });
+  }
+
   // useProducer("2");
   // useProducer("3");
   // useProducer("4");

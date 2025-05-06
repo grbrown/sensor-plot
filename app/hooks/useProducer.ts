@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const MAXIMUM_POINT_WINDOW = 10000;
+const MAXIMUM_POINT_WINDOW = 1000;
 
 export type ProducerData = { timestamp: string; value: number };
 
