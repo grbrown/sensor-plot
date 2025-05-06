@@ -18,18 +18,28 @@ export const convertMultiProducerDataToUPlotArray = (
 
   var indicesToDelete: number[] = [];
 
-  if (producerData[0].length > MAXIMUM_POINT_WINDOW) {
-    var currTs = new Date(producerData[0][0].timestamp).getTime();
+  const minimumFilledData = producerData
+    .map((pd, index) => ({ length: pd.length, index }))
+    .sort((pd1, pd2) => pd1.length - pd2.length)[0];
+  const minFilledDataIndex = minimumFilledData.index;
+
+  if (minimumFilledData.length > MAXIMUM_POINT_WINDOW) {
+    var currTs = new Date(
+      producerData[minFilledDataIndex][0].timestamp
+    ).getTime();
     const msSpan =
       new Date(
-        producerData[0][producerData[0].length - 1].timestamp
-      ).getTime() - new Date(producerData[0][0].timestamp).getTime();
+        producerData[minFilledDataIndex][
+          producerData[minFilledDataIndex].length - 1
+        ].timestamp
+      ).getTime() -
+      new Date(producerData[minFilledDataIndex][0].timestamp).getTime();
     const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
-    producerData[0].forEach((curr, index) => {
+    producerData[minFilledDataIndex].forEach((curr, index) => {
       if (index === 0) {
         return;
       }
-      if (index >= producerData[0].length) {
+      if (index >= producerData[minFilledDataIndex].length) {
         return;
       }
 
@@ -44,12 +54,11 @@ export const convertMultiProducerDataToUPlotArray = (
     });
   }
 
-  producerData.forEach((curr, index) => {
-    if (indicesToDelete.includes(index)) {
-      curr.splice(index, 1);
-    }
+  indicesToDelete.forEach((currIndex) => {
+    producerData.forEach((curr) => {
+      curr.splice(currIndex, 1);
+    });
   });
-
   const canonicalXPoints = producerData[0].map((curr) => {
     const unixTs = new Date(curr.timestamp).getTime() / 1000;
     return unixTs;
