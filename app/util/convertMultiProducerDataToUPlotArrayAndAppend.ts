@@ -90,10 +90,11 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
     console.log(`sensor ${i + 1} ts error `, currTsError);
   }
 
+  const currDataCopy = [...currData];
   console.log("totalTimeError", totalTimeError);
   const newPoints = [canonicalXPoints, ...dataY] as MultiLinePlotData;
-  currData.forEach((curr, index) => {
+  currDataCopy.forEach((curr, index) => {
     curr.push(...newPoints[index]);
   });
-  return currData;
+  return currDataCopy;
 };
