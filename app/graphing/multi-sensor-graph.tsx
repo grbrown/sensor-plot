@@ -193,12 +193,16 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
+  const [dataLength, setDataLength] = useState(0);
+
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
+
       producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
+      setDataLength(producer10DataRef.current.length);
     };
   }, []);
 
@@ -324,7 +328,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
               <th>Producer</th>
               <th>Min</th>
               <th>Max</th>
-              <th>Avg</th>
+              <th>{dataLength}</th>
             </tr>
             {oneToTen.map((index) => {
               return (
