@@ -162,6 +162,36 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             bufferData,
             curr
           );
+          const MAXIMUM_POINT_WINDOW = 1000;
+
+          if (newData[0].length > MAXIMUM_POINT_WINDOW) {
+            var indicesToDelete: number[] = [];
+            const msSpan = newData[0][newData[0].length - 1] - newData[0][0];
+            const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
+            var currTs = newData[0][0];
+            newData[0].forEach((curr, index) => {
+              if (index === 0) {
+                return;
+              }
+              if (index >= newData[0].length) {
+                return;
+              }
+              const nextTs = curr;
+
+              const timeDelta = Math.abs(nextTs - currTs);
+              if (timeDelta < desiredPointDensity) {
+                indicesToDelete.push(index);
+              } else {
+                currTs = nextTs;
+              }
+            });
+            indicesToDelete.forEach((currIndex) => {
+              newData.forEach((curr) => {
+                curr.splice(currIndex, 1);
+              });
+            });
+            console.log("deleted ", indicesToDelete.length + " points");
+          }
           return newData;
         });
       }
@@ -329,6 +359,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
         onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
       />
+
+      <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
       {zoomEnabled && (
         <div className="w-[400px]">
           <button
@@ -347,7 +379,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
               <th>Producer</th>
               <th>Min</th>
               <th>Max</th>
-              <th>{dataLength}</th>
+              <th>Avg</th>
             </tr>
             {oneToTen.map((index) => {
               return (
