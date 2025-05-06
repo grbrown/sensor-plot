@@ -130,6 +130,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const producer8DataRef = useRef<ProducerData[]>([]);
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
+  const lastPointCullingTs = useRef<number>(0);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -162,9 +163,13 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             bufferData,
             curr
           );
-          const MAXIMUM_POINT_WINDOW = 1000;
+          const MAXIMUM_POINT_WINDOW = 100;
 
-          if (newData[0].length > MAXIMUM_POINT_WINDOW) {
+          if (
+            newData[0].length > MAXIMUM_POINT_WINDOW &&
+            lastPointCullingTs.current + 1000 < new Date().getTime()
+          ) {
+            lastPointCullingTs.current = new Date().getTime();
             var indicesToDelete: number[] = [];
             const msSpan = newData[0][newData[0].length - 1] - newData[0][0];
             const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
