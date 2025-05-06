@@ -151,6 +151,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         producer10DataRef.current,
       ];
       if (!producersData.find((pd) => pd.length === 0)) {
+        const prod1StartLen = producer1DataRef.current.length;
+        console.log("diag- producer1 length", producer1DataRef.current.length);
         const bufferMinLength = Math.min(
           ...producersData.map((pd) => pd.length)
         );
@@ -158,7 +160,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         producersData.forEach((pd) => {
           bufferData.push(pd.splice(0, bufferMinLength));
         });
+        console.log("diag- bufferDataLength", bufferData[0].length);
+        console.log(
+          "diag- producer1 length after splice",
+          producer1DataRef.current.length
+        );
+        const prod1EndLen = producer1DataRef.current.length;
+        if (prod1StartLen - bufferData[0].length !== prod1EndLen) {
+          console.error("diag- producer1 length mismatch");
+        }
         setGraphData((curr) => {
+          console.log(
+            "diag- starting point setter curr length ",
+            curr[0].length
+          );
           const newData = convertMultiProducerDataToUPlotArrayAndAppend(
             bufferData,
             curr
@@ -195,8 +210,16 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
                 curr.splice(currIndex, 1);
               });
             });
-            console.log("deleted ", indicesToDelete.length + " points");
+            console.log("diag- deleted ", indicesToDelete.length + " points");
           }
+          console.log(
+            "diag- finished point setter curr length ",
+            newData[0].length
+          );
+          console.log(
+            "diag- finished point setter buffer length ",
+            bufferData[0].length
+          );
           return newData;
         });
       }
