@@ -101,9 +101,17 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       []
     )
   );
-  const producer1Data = useProducer("1", live);
 
   const producer1DataRef = useRef<ProducerData[]>([]);
+  const producer2DataRef = useRef<ProducerData[]>([]);
+  const producer3DataRef = useRef<ProducerData[]>([]);
+  const producer4DataRef = useRef<ProducerData[]>([]);
+  const producer5DataRef = useRef<ProducerData[]>([]);
+  const producer6DataRef = useRef<ProducerData[]>([]);
+  const producer7DataRef = useRef<ProducerData[]>([]);
+  const producer8DataRef = useRef<ProducerData[]>([]);
+  const producer9DataRef = useRef<ProducerData[]>([]);
+  const producer10DataRef = useRef<ProducerData[]>([]);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -114,7 +122,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer2DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -123,7 +130,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       producer2DataRef.current = [...producer2DataRef.current, ...dataArray];
     };
   }, []);
-  const producer3DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -133,7 +139,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer4DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -143,7 +148,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer5DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -153,7 +157,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer6DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -163,7 +166,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer7DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -173,7 +175,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer8DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -183,7 +184,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer9DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -193,7 +193,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const producer10DataRef = useRef<ProducerData[]>([]);
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
