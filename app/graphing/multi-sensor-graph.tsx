@@ -131,6 +131,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
   const lastPointCullingTs = useRef<number>(0);
+  const lastPointSetterTs = useRef<number>(0);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -150,7 +151,14 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         producer9DataRef.current,
         producer10DataRef.current,
       ];
-      if (!producersData.find((pd) => pd.length === 0)) {
+      if (
+        !producersData.find(
+          (pd) =>
+            pd.length === 0 &&
+            lastPointSetterTs.current + 1000 > new Date().getTime()
+        )
+      ) {
+        lastPointSetterTs.current = new Date().getTime();
         const prod1StartLen = producer1DataRef.current.length;
         console.log("diag- producer1 length", producer1DataRef.current.length);
         const bufferMinLength = Math.min(
@@ -181,8 +189,9 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           const MAXIMUM_POINT_WINDOW = 100;
 
           if (
-            newData[0].length > MAXIMUM_POINT_WINDOW &&
-            lastPointCullingTs.current + 1000 < new Date().getTime()
+            newData[0].length > MAXIMUM_POINT_WINDOW
+            // &&
+            // lastPointCullingTs.current + 1000 < new Date().getTime()
           ) {
             lastPointCullingTs.current = new Date().getTime();
             var indicesToDelete: number[] = [];
