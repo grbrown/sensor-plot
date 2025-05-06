@@ -5,8 +5,12 @@ import "uplot/dist/uPlot.min.css";
 import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { darkColors, lightColors } from "~/constants/colors";
-import { convertMultiProducerDataToUPlotArray } from "~/util/convertMultiProducerDataToUPlotArray";
+import {
+  convertMultiProducerDataToUPlotArray,
+  type MultiLinePlotData,
+} from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
+import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 
 const loadStartTime = performance.now();
 
@@ -29,6 +33,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
 
   // Track whether we're in a zoomed state
   const needsZoomReset = useRef(false);
+
+  const [graphData, setGraphData] = useState<MultiLinePlotData>([
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ]);
 
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
@@ -119,6 +137,34 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
       producer1DataRef.current = [...producer1DataRef.current, ...dataArray];
+      const producersData = [
+        producer1DataRef.current,
+        producer2DataRef.current,
+        producer3DataRef.current,
+        producer4DataRef.current,
+        producer5DataRef.current,
+        producer6DataRef.current,
+        producer7DataRef.current,
+        producer8DataRef.current,
+        producer9DataRef.current,
+        producer10DataRef.current,
+      ];
+      if (!producersData.find((pd) => pd.length === 0)) {
+        const bufferMinLength = Math.min(
+          ...producersData.map((pd) => pd.length)
+        );
+        const bufferData: ProducerData[][] = [];
+        producersData.forEach((pd) => {
+          bufferData.push(pd.splice(0, bufferMinLength));
+        });
+        setGraphData((curr) => {
+          const newData = convertMultiProducerDataToUPlotArrayAndAppend(
+            bufferData,
+            curr
+          );
+          return newData;
+        });
+      }
     };
   }, []);
 
@@ -193,7 +239,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  const [dataLength, setDataLength] = useState(0);
+  //const [dataLength, setDataLength] = useState(0);
+  const dataLength = graphData[0].length;
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -202,7 +249,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       const dataArray = JSON.parse(event.data);
 
       producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
-      setDataLength(producer10DataRef.current.length);
+      //setDataLength(producer10DataRef.current.length);
     };
   }, []);
 
@@ -215,48 +262,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   // const producer8Data = useProducer("8", live);
   // const producer9Data = useProducer("9", live);
   // const producer10Data = useProducer("10", live);
-  const producersData = [
-    producer1DataRef.current,
-    producer2DataRef.current,
-    producer3DataRef.current,
-    producer4DataRef.current,
-    producer5DataRef.current,
-    producer6DataRef.current,
-    producer7DataRef.current,
-    producer8DataRef.current,
-    producer9DataRef.current,
-    producer10DataRef.current,
-  ];
-
-  if (producersData.find((pd) => producersData[0].length !== pd.length)) {
-    console.log("Not all producers have the same length");
-    producersData.forEach((pd2) => {
-      console.log(pd2.length);
-    });
-  }
-
-  // useProducer("2");
-  // useProducer("3");
-  // useProducer("4");
-  // if (producer1Data !== undefined) {
-  //   debugger;
-  // }
-
-  const data = convertMultiProducerDataToUPlotArray(producersData);
 
   const zoomEnabled = scaleStateRef.current !== null;
   const zoomedData = (() => {
     if (needsZoomReset.current) {
-      return data;
+      return graphData;
     }
     if (!zoomEnabled) {
       return null;
     }
     const xScaleMin = scaleStateRef.current!.min;
     const xScaleMax = scaleStateRef.current!.max;
-    const startPointIndex = data[0].findIndex((x) => x >= xScaleMin);
-    const endPointIndex = data[0].findIndex((x) => x >= xScaleMax);
-    const zoomedData = data.map((arr) =>
+    const startPointIndex = graphData[0].findIndex((x) => x >= xScaleMin);
+    const endPointIndex = graphData[0].findIndex((x) => x >= xScaleMax);
+    const zoomedData = graphData.map((arr) =>
       arr.slice(startPointIndex, endPointIndex)
     );
     return zoomedData;
@@ -265,7 +284,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   if (zoomedData !== null) {
     console.log("zoomedData", zoomedData);
   }
-  const plotData = zoomedData ?? data;
+  const plotData = zoomedData ?? graphData;
 
   const averages = zoomedData?.slice(1).map((arr) => {
     return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
