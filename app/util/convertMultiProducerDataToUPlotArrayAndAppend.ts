@@ -94,7 +94,7 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
   console.log("totalTimeError", totalTimeError);
   const newPoints = [canonicalXPoints, ...dataY] as MultiLinePlotData;
   const ret = currData.map((curr, index) => {
-    return [curr, ...newPoints[index]];
+    return [...curr, ...newPoints[index]];
   }) as MultiLinePlotData;
   return ret;
 };

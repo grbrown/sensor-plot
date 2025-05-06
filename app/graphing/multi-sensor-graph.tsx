@@ -157,14 +157,16 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         producersData.forEach((pd) => {
           bufferData.push(pd.splice(0, bufferMinLength));
         });
-        const newData = convertMultiProducerDataToUPlotArrayAndAppend(
-          bufferData,
-          graphData
-        );
-        setGraphData(newData);
+        setGraphData((curr) => {
+          const newData = convertMultiProducerDataToUPlotArrayAndAppend(
+            bufferData,
+            curr
+          );
+          return newData;
+        });
       }
     };
-  }, [graphData]);
+  }, []);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
