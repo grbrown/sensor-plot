@@ -16,7 +16,6 @@ function DataPointMaximum() {
     }
   }, []);
 
-  // Handle saving max points to localStorage
   const saveMaxPoints = () => {
     localStorage.setItem("dataPointMaximum", maxPoints.toString());
   };
@@ -82,7 +81,6 @@ export default function Home() {
         time window
       </p>
 
-      {/* Added localStorage demo components */}
       <DataPointMaximum />
     </div>
   );
