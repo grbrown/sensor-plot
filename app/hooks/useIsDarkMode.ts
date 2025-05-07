@@ -1,7 +1,6 @@
-// useColorScheme.ts
 import { useState, useEffect } from "react";
 
-export function useColorScheme() {
+export function useIsDarkMode() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -11,7 +10,7 @@ export function useColorScheme() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e) => setIsDarkMode(e.matches);
+    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);

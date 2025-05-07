@@ -1,18 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useProducer, type ProducerData } from "~/hooks/useProducer";
-import UPlotReact from "uplot-react";
+import { type ProducerData } from "~/hooks/useProducer";
 import "uplot/dist/uPlot.min.css";
-import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
-import { useColorScheme } from "~/hooks/useColorScheme";
+import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
-import {
-  convertMultiProducerDataToUPlotArray,
-  type MultiLinePlotData,
-} from "~/util/convertMultiProducerDataToUPlotArray";
+import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
-
-const loadStartTime = performance.now();
+import { DEFAULT_DATA_POINT_MAXIMUM } from "~/routes/home";
 
 const dummyPlugin = (): uPlot.Plugin => ({
   hooks: {
@@ -25,11 +19,36 @@ const dummyPlugin = (): uPlot.Plugin => ({
 
 export type SensorGraphProps = {
   live?: boolean;
+  windowed?: boolean;
 };
 
-export function MultiSensorGraph({ live }: SensorGraphProps) {
+const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
+  if (windowed) {
+    return (
+      "Multi Sensor Graph, Time Windowed - Maximum Data Points: " +
+      maximumDataPointValue
+    );
+  } else {
+    return "Multi Sensor Graph - Maximum Data Points: " + maximumDataPointValue;
+  }
+};
+
+export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
+  const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
+  const maximumDataPoints = maximumDataPointsRef.current;
+  console.log("mxdp-", maximumDataPoints);
+  useEffect(() => {
+    const storedMaxPoints = localStorage.getItem("dataPointMaximum");
+    if (storedMaxPoints) {
+      maximumDataPointsRef.current = parseFloat(storedMaxPoints);
+      setOptions((prev) => ({
+        ...prev,
+        title: getGraphTitle(windowed, maximumDataPointsRef.current),
+      }));
+    }
+  }, []);
   const oneToTen = [...Array(10)].map((_, i) => i + 1);
-  const colorScheme = useColorScheme();
+  const isDarkMode = useIsDarkMode();
 
   // Track whether we're in a zoomed state
   const needsZoomReset = useRef(false);
@@ -51,10 +70,42 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
+  const colorSchemeOptions = isDarkMode
+    ? {
+        axes: [
+          {
+            // x-axis
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+          {
+            // y-axis
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+        ],
+      }
+    : {};
+
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
-        title: "Chart",
+        title: getGraphTitle(windowed, maximumDataPointsRef.current),
+        ...colorSchemeOptions,
         width: 400,
         height: 300,
         series: [
@@ -64,7 +115,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           ...oneToTen.map((i) => ({
             label: "Value" + i,
             points: { show: false },
-            stroke: colorScheme ? darkColors[i - 1] : lightColors[i - 1],
+            stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
           })),
         ],
         plugins: [dummyPlugin()],
@@ -130,7 +181,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const producer8DataRef = useRef<ProducerData[]>([]);
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
-  const lastPointCullingTs = useRef<number>(0);
   const lastPointSetterTs = useRef<number>(0);
 
   useEffect(() => {
@@ -186,52 +236,49 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             bufferData,
             curr
           );
-          //var newDataFiltered;
-          const MAXIMUM_POINT_WINDOW = 1000;
 
-          if (
-            newData[0].length > MAXIMUM_POINT_WINDOW
-            // &&
-            // lastPointCullingTs.current + 5000 < new Date().getTime()
-          ) {
-            lastPointCullingTs.current = new Date().getTime();
-            var indicesToDelete: Set<number> = new Set();
-            const secondsSpan =
-              newData[0][newData[0].length - 1] - newData[0][0];
-            const desiredPointDensity = secondsSpan / MAXIMUM_POINT_WINDOW;
-            console.log(
-              "diagtime-desiredPointDensityMs",
-              desiredPointDensity * 1000
-            );
-            console.log("diagtime-secondsSpan", secondsSpan);
-            var currTs = newData[0][0];
-            newData[0].forEach((curr, index) => {
-              if (index === 0) {
-                return;
-              }
-              if (index >= newData[0].length) {
-                return;
-              }
-              const nextTs = curr;
+          if (newData[0].length > maximumDataPointsRef.current) {
+            if (!windowed) {
+              var indicesToDelete: Set<number> = new Set();
+              const secondsSpan =
+                newData[0][newData[0].length - 1] - newData[0][0];
+              const desiredPointDensity =
+                secondsSpan / maximumDataPointsRef.current;
+              console.log(
+                "diagtime-desiredPointDensityMs",
+                desiredPointDensity * 1000
+              );
+              console.log("diagtime-secondsSpan", secondsSpan);
+              var currTs = newData[0][0];
+              newData[0].forEach((curr, index) => {
+                if (index === 0) {
+                  return;
+                }
+                if (index >= newData[0].length) {
+                  return;
+                }
+                const nextTs = curr;
 
-              const timeDelta = Math.abs(nextTs - currTs);
-              if (timeDelta < desiredPointDensity) {
-                indicesToDelete.add(index);
-              } else {
-                currTs = nextTs;
-              }
-            });
-            newData = newData.map((xOrYArray) =>
-              xOrYArray.filter((_, index) => {
-                return !indicesToDelete.has(index);
-              })
-            );
-            // indicesToDelete.forEach((currIndex) => {
-            //   newData.forEach((curr) => {
-            //     curr.splice(currIndex, 1);
-            //   });
-            // });
-            //console.log("diag- deleted ", indicesToDelete.length + " points");
+                const timeDelta = Math.abs(nextTs - currTs);
+                if (timeDelta < desiredPointDensity) {
+                  indicesToDelete.add(index);
+                } else {
+                  currTs = nextTs;
+                }
+              });
+              newData = newData.map((xOrYArray) =>
+                xOrYArray.filter((_, index) => {
+                  return !indicesToDelete.has(index);
+                })
+              );
+            } else {
+              // If we're in windowed mode, we want to keep the last 1000 points
+              newData = newData.map((xOrYArray) =>
+                xOrYArray.slice(
+                  Math.max(0, xOrYArray.length - maximumDataPointsRef.current)
+                )
+              );
+            }
           }
           console.log(
             "diag- finished point setter curr length ",
@@ -339,7 +386,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  //const [dataLength, setDataLength] = useState(0);
   const dataLength = graphData[0].length;
 
   useEffect(() => {
@@ -349,19 +395,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       const dataArray = JSON.parse(event.data);
 
       producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
-      //setDataLength(producer10DataRef.current.length);
     };
   }, []);
-
-  // const producer2Data = useProducer("2", live);
-  // const producer3Data = useProducer("3", live);
-  // const producer4Data = useProducer("4", live);
-  // const producer5Data = useProducer("5", live);
-  // const producer6Data = useProducer("6", live);
-  // const producer7Data = useProducer("7", live);
-  // const producer8Data = useProducer("8", live);
-  // const producer9Data = useProducer("9", live);
-  // const producer10Data = useProducer("10", live);
 
   const zoomEnabled = scaleStateRef.current !== null;
   const zoomedData = (() => {
@@ -425,9 +460,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         setOptions={setOptions}
         options={options}
         data={plotData}
-        //target={root}
-        onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
-        onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
       />
 
       <div style={{ position: "relative", right: 80 }}>{dataLength}</div>

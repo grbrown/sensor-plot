@@ -1,7 +1,5 @@
 import type { ProducerData } from "~/hooks/useProducer";
 
-const MAXIMUM_POINT_WINDOW = 500;
-
 export type MultiLinePlotData = number[][];
 
 export const convertMultiProducerDataToUPlotArrayAndAppend = (
@@ -16,51 +14,6 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
     }
     return ret;
   }
-
-  // var indicesToDelete: number[] = [];
-
-  // const minimumFilledData = producerData
-  //   .map((pd, index) => ({ length: pd.length, index }))
-  //   .sort((pd1, pd2) => pd1.length - pd2.length)[0];
-  // const minFilledDataIndex = minimumFilledData.index;
-
-  // if (minimumFilledData.length > MAXIMUM_POINT_WINDOW) {
-  //   var currTs = new Date(
-  //     producerData[minFilledDataIndex][0].timestamp
-  //   ).getTime();
-  //   const msSpan =
-  //     new Date(
-  //       producerData[minFilledDataIndex][
-  //         producerData[minFilledDataIndex].length - 1
-  //       ].timestamp
-  //     ).getTime() -
-  //     new Date(producerData[minFilledDataIndex][0].timestamp).getTime();
-  //   const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
-  //   producerData[minFilledDataIndex].forEach((curr, index) => {
-  //     if (index === 0) {
-  //       return;
-  //     }
-  //     if (index >= producerData[minFilledDataIndex].length) {
-  //       return;
-  //     }
-
-  //     const nextTs = new Date(curr.timestamp).getTime();
-
-  //     const timeDelta = Math.abs(nextTs - currTs);
-  //     if (timeDelta < desiredPointDensity) {
-  //       indicesToDelete.push(index);
-  //     } else {
-  //       currTs = nextTs;
-  //     }
-  //   });
-  // }
-  // const producerDataCopy = [...producerData];
-  // indicesToDelete.forEach((currIndex) => {
-  //   producerDataCopy.forEach((curr) => {
-  //     curr.splice(currIndex, 1);
-  //   });
-  // });
-  // producerData = producerDataCopy;
   const canonicalXPoints = producerData[0].map((curr) => {
     const unixTs = new Date(curr.timestamp).getTime() / 1000;
     return unixTs;
@@ -90,7 +43,6 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
     console.log(`sensor ${i + 1} ts error `, currTsError);
   }
 
-  //const currDataCopy = [...currData];
   console.log("totalTimeError", totalTimeError);
   const newPoints = [canonicalXPoints, ...dataY] as MultiLinePlotData;
 
@@ -98,25 +50,5 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
     return [...curr, ...newPoints[index]];
   }) as MultiLinePlotData;
 
-  // if (ret[0].length > 20) {
-  //   const oneToTen = [...Array(10)].map((_, i) => i + 1);
-  //   const firstTenPointDeltas = oneToTen.map((curr) => {
-  //     const currTs = ret[0][curr];
-  //     const nextTs = ret[0][curr + 1];
-  //     const timeDelta = Math.abs(nextTs - currTs);
-  //     return timeDelta;
-  //   });
-
-  //   const lastTenPointDeltas = oneToTen.map((curr) => {
-  //     const nextTs = ret[0][ret[0].length - curr];
-  //     const currTs = ret[0][ret[0].length - (curr + 1)];
-  //     const timeDelta = Math.abs(nextTs - currTs);
-  //     return timeDelta;
-  //   });
-
-  //   console.log("diagtime-firstTenPointDeltas", firstTenPointDeltas);
-  //   console.log("diagtime-lastTenPointDeltas", lastTenPointDeltas);
-  //   console.log("diagtime-ret", ret);
-  // }
   return ret;
 };
