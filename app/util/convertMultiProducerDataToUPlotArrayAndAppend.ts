@@ -1,4 +1,4 @@
-import type { ProducerData } from "~/hooks/useProducer";
+import type { ProducerData } from "~/graphing/multi-sensor-graph";
 
 export type MultiLinePlotData = number[][];
 
@@ -31,19 +31,6 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
     dataY.push(sensorDataY);
   }
 
-  for (var i = 0; i < producerData.length; i++) {
-    const graphLen = canonicalXPoints.length;
-    const curr = producerData[i][graphLen - 1];
-    if (curr === undefined) {
-      break;
-    }
-    const currCanonicalTs = canonicalXPoints[graphLen - 1];
-    const currTs = new Date(curr.timestamp).getTime() / 1000;
-    const currTsError = currTs - currCanonicalTs;
-    console.log(`sensor ${i + 1} ts error `, currTsError);
-  }
-
-  console.log("totalTimeError", totalTimeError);
   const newPoints = [canonicalXPoints, ...dataY] as MultiLinePlotData;
 
   const ret = currData.map((curr, index) => {

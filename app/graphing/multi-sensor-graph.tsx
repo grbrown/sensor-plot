@@ -1,26 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type ProducerData } from "~/hooks/useProducer";
 import "uplot/dist/uPlot.min.css";
 import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
-import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
-import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
+import {
+  convertMultiProducerDataToUPlotArrayAndAppend,
+  type MultiLinePlotData,
+} from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/routes/home";
-
-const dummyPlugin = (): uPlot.Plugin => ({
-  hooks: {
-    init(u: uPlot, opts: uPlot.Options) {
-      void u;
-      void opts;
-    },
-  },
-});
 
 export type SensorGraphProps = {
   live?: boolean;
   windowed?: boolean;
 };
+
+export type ProducerData = { timestamp: string; value: number };
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -35,8 +29,6 @@ const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
 
 export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
-  const maximumDataPoints = maximumDataPointsRef.current;
-  console.log("mxdp-", maximumDataPoints);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
     if (storedMaxPoints) {
@@ -118,17 +110,15 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
             stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
           })),
         ],
-        plugins: [dummyPlugin()],
         scales: { x: { time: true } },
         // Add custom handling for auto-ranging to preserve zoom
         hooks: {
           // Track when user zooms in
           setScale: [
             (u) => {
-              console.log("hook-setScale");
               // Get x-scale min/max
-              const xScaleMin = u.scales.x.min;
-              const xScaleMax = u.scales.x.max;
+              const xScaleMin = u.scales.x.min!;
+              const xScaleMax = u.scales.x.max!;
 
               // Get full data range
               const xData = u.data[0];
@@ -159,7 +149,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
 
           setSelect: [
             (u) => {
-              console.log("hook-setSelect");
               if (scaleStateRef.current != null) {
                 scaleStateRef.current = null;
               }
@@ -181,7 +170,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const producer8DataRef = useRef<ProducerData[]>([]);
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
-  const lastPointSetterTs = useRef<number>(0);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -201,16 +189,8 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
         producer9DataRef.current,
         producer10DataRef.current,
       ];
-      if (
-        !producersData.find(
-          (pd) =>
-            pd.length === 0 &&
-            lastPointSetterTs.current + 1000 > new Date().getTime()
-        )
-      ) {
-        lastPointSetterTs.current = new Date().getTime();
+      if (!producersData.find((pd) => pd.length === 0)) {
         const prod1StartLen = producer1DataRef.current.length;
-        console.log("diag- producer1 length", producer1DataRef.current.length);
         const bufferMinLength = Math.min(
           ...producersData.map((pd) => pd.length)
         );
@@ -218,20 +198,13 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
         producersData.forEach((pd) => {
           bufferData.push(pd.splice(0, bufferMinLength));
         });
-        console.log("diag- bufferDataLength", bufferData[0].length);
-        console.log(
-          "diag- producer1 length after splice",
-          producer1DataRef.current.length
-        );
+        //todo: evaluate this code
         const prod1EndLen = producer1DataRef.current.length;
         if (prod1StartLen - bufferData[0].length !== prod1EndLen) {
           console.error("diag- producer1 length mismatch");
         }
         setGraphData((curr) => {
-          console.log(
-            "diag- starting point setter curr length ",
-            curr[0].length
-          );
+          //todo factor into method
           var newData = convertMultiProducerDataToUPlotArrayAndAppend(
             bufferData,
             curr
@@ -244,11 +217,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                 newData[0][newData[0].length - 1] - newData[0][0];
               const desiredPointDensity =
                 secondsSpan / maximumDataPointsRef.current;
-              console.log(
-                "diagtime-desiredPointDensityMs",
-                desiredPointDensity * 1000
-              );
-              console.log("diagtime-secondsSpan", secondsSpan);
+
               var currTs = newData[0][0];
               newData[0].forEach((curr, index) => {
                 if (index === 0) {
@@ -280,35 +249,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
               );
             }
           }
-          console.log(
-            "diag- finished point setter curr length ",
-            newData[0].length
-          );
-          console.log(
-            "diag- finished point setter buffer length ",
-            newData[0].length
-          );
 
-          if (newData[0].length > 20) {
-            const oneToTen = [...Array(10)].map((_, i) => i + 1);
-            const firstTenPointDeltas = oneToTen.map((curr) => {
-              const currTs = newData[0][curr];
-              const nextTs = newData[0][curr + 1];
-              const timeDelta = Math.abs(nextTs - currTs);
-              return timeDelta * 1000;
-            });
-
-            const lastTenPointDeltas = oneToTen.map((curr) => {
-              const nextTs = newData[0][newData[0].length - curr];
-              const currTs = newData[0][newData[0].length - (curr + 1)];
-              const timeDelta = Math.abs(nextTs - currTs);
-              return timeDelta * 1000;
-            });
-
-            console.log("diagtime-firstTenPointDeltasMs", firstTenPointDeltas);
-            console.log("diagtime-lastTenPointDeltasMs", lastTenPointDeltas);
-            console.log("diagtime-retS", newData[0]);
-          }
           return newData;
         });
       }
@@ -316,7 +257,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/2`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -324,7 +265,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     };
   }, []);
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/3`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -333,7 +274,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/4`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -342,7 +283,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/5`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -351,7 +292,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/6`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -360,7 +301,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/7`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -369,7 +310,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/8`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -378,7 +319,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/9`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -386,10 +327,8 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     };
   }, []);
 
-  const dataLength = graphData[0].length;
-
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/10`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -416,9 +355,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     return zoomedData;
   })();
 
-  if (zoomedData !== null) {
-    console.log("zoomedData", zoomedData);
-  }
   const plotData = zoomedData ?? graphData;
 
   const averages = zoomedData?.slice(1).map((arr) => {
@@ -429,12 +365,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   });
   const minimums = zoomedData?.slice(1).map((arr) => {
     return Math.min(...arr);
-  });
-  const stdDevs = zoomedData?.slice(1).map((arr) => {
-    const avg = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
-    const variance =
-      arr.reduce((acc, curr) => acc + (curr - avg) ** 2, 0) / arr.length;
-    return Math.sqrt(variance);
   });
 
   useEffect(() => {
@@ -447,24 +377,15 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, [zoomEnabled]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "nowrap",
-      }}
-    >
+    <div className="w-full flex flex-row flex-nowrap">
       <AutoResizeUPlotReact
         key="hooks-key"
         setOptions={setOptions}
         options={options}
-        data={plotData}
+        data={plotData as uPlot.AlignedData}
       />
-
-      <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
       {zoomEnabled && (
-        <div className="w-[400px]">
+        <div className="w-[300px] p-2 border-l border-gray-300 dark:border-gray-700 flex flex-col justify-center">
           <button
             onClick={() => {
               needsZoomReset.current = true;
@@ -473,26 +394,61 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                 width: prev.width + 300,
               }));
             }}
+            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mb-2 w-full text-sm"
           >
             Reset zoom
           </button>
-          <table>
-            <tr>
-              <th>Producer</th>
-              <th>Min</th>
-              <th>Max</th>
-              <th>Avg</th>
-            </tr>
-            {oneToTen.map((index) => {
-              return (
-                <tr>
-                  <th>Producer {index}</th>
-                  <td>{minimums?.[index - 1]?.toFixed(4)}</td>
-                  <td>{maximums?.[index - 1]?.toFixed(4)}</td>
-                  <td>{averages?.[index - 1]?.toFixed(4)}</td>
-                </tr>
-              );
-            })}
+          <h3 className="font-semibold mb-1 text-center text-sm">Statistics</h3>
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr className="bg-gray-100 dark:bg-gray-800">
+                <th className="py-2 px-2 text-left border border-gray-300 dark:border-gray-700">
+                  Producer
+                </th>
+                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                  Min
+                </th>
+                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                  Max
+                </th>
+                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                  Avg
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {oneToTen.map((index) => {
+                // Get the color for this producer
+                const color = isDarkMode
+                  ? darkColors[index - 1]
+                  : lightColors[index - 1];
+                return (
+                  <tr
+                    key={`producer-${index}`}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-900"
+                  >
+                    <th className="py-2 px-2 text-left border border-gray-300 dark:border-gray-700 font-medium">
+                      <div className="flex items-center">
+                        <div
+                          className="w-2 h-2 rounded-full mr-1"
+                          style={{ backgroundColor: color }}
+                        ></div>
+                        P{index}
+                      </div>
+                    </th>
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                      {minimums?.[index - 1]?.toFixed(2) || "-"}
+                    </td>
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                      {maximums?.[index - 1]?.toFixed(2) || "-"}
+                    </td>
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
+                      {averages?.[index - 1]?.toFixed(2) || "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         </div>
       )}

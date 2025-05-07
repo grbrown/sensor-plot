@@ -22,7 +22,6 @@ export function AutoResizeUPlotReact({
       }));
     }
 
-    // Optional: Add resize listener to update on window resize
     const handleResize = () => {
       if (chartRef.current) {
         const { width, height } = chartRef.current.getBoundingClientRect();
@@ -41,7 +40,7 @@ export function AutoResizeUPlotReact({
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "90vh" }} ref={chartRef}>
+    <div className="w-full h-[90vh]" ref={chartRef}>
       <UPlotReact {...props} />
     </div>
   );

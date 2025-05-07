@@ -1,9 +1,7 @@
-import { Plots } from "~/welcome/plots";
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
 import { useState, useEffect } from "react";
 
-export const DEFAULT_DATA_POINT_MAXIMUM = 10000;
+export const DEFAULT_DATA_POINT_MAXIMUM = 100000;
 
 function DataPointMaximum() {
   const [maxPoints, setMaxPoints] = useState<number>(
@@ -18,7 +16,6 @@ function DataPointMaximum() {
     }
   }, []);
 
-  // Handle saving max points to localStorage
   const saveMaxPoints = () => {
     localStorage.setItem("dataPointMaximum", maxPoints.toString());
   };
@@ -28,6 +25,10 @@ function DataPointMaximum() {
       <h2 className="text-lg font-semibold mb-2 dark:text-white">
         Data Point Maximum
       </h2>
+      <p className="text-xs text-gray-600 mb-2">
+        Beyond this limit, graphs will discard points. Use this to prevent
+        crashes. Note: one point represents 10 producer values.
+      </p>
 
       <div className="flex mb-4">
         <input
@@ -69,6 +70,7 @@ export default function Home() {
         Collect data until datapoint maximum reached, then trim resolution from
         the data set to maintain consistent dataset size
       </p>
+      <br></br>
       <a
         className="text-blue-600 hover:text-blue-800 hover:underline"
         href="/multi-sensor-live-windowed"
@@ -80,7 +82,7 @@ export default function Home() {
         time window
       </p>
 
-      {/* Added localStorage demo components */}
+      <br></br>
       <DataPointMaximum />
     </div>
   );
