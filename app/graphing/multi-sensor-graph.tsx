@@ -187,11 +187,12 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             curr
           );
           //var newDataFiltered;
-          const MAXIMUM_POINT_WINDOW = 10000;
+          const MAXIMUM_POINT_WINDOW = 1000;
 
           if (
-            newData[0].length > MAXIMUM_POINT_WINDOW &&
-            lastPointCullingTs.current + 5000 < new Date().getTime()
+            newData[0].length > MAXIMUM_POINT_WINDOW
+            // &&
+            // lastPointCullingTs.current + 5000 < new Date().getTime()
           ) {
             lastPointCullingTs.current = new Date().getTime();
             var indicesToDelete: Set<number> = new Set();
