@@ -366,12 +366,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const minimums = zoomedData?.slice(1).map((arr) => {
     return Math.min(...arr);
   });
-  const stdDevs = zoomedData?.slice(1).map((arr) => {
-    const avg = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
-    const variance =
-      arr.reduce((acc, curr) => acc + (curr - avg) ** 2, 0) / arr.length;
-    return Math.sqrt(variance);
-  });
 
   useEffect(() => {
     if (zoomEnabled === true) {
