@@ -1,5 +1,6 @@
 import { Plots } from "~/welcome/plots";
 import type { Route } from "./+types/home";
+import { Link } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,5 +10,9 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Plots></Plots>;
+  return (
+    <div>
+      <a href="/multi-sensor-live">Multi Sensor Graph</a>
+    </div>
+  );
 }
