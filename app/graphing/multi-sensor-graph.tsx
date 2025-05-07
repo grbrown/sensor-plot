@@ -427,7 +427,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                     key={`producer-${index}`}
                     className="hover:bg-gray-50 dark:hover:bg-gray-900"
                   >
-                    <th className="py-1 px-2 text-left border border-gray-300 dark:border-gray-700 font-medium">
+                    <th className="py-2 px-2 text-left border border-gray-300 dark:border-gray-700 font-medium">
                       <div className="flex items-center">
                         <div
                           className="w-2 h-2 rounded-full mr-1"
@@ -436,13 +436,13 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                         P{index}
                       </div>
                     </th>
-                    <td className="py-1 px-2 text-right border border-gray-300 dark:border-gray-700">
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
                       {minimums?.[index - 1]?.toFixed(2) || "-"}
                     </td>
-                    <td className="py-1 px-2 text-right border border-gray-300 dark:border-gray-700">
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
                       {maximums?.[index - 1]?.toFixed(2) || "-"}
                     </td>
-                    <td className="py-1 px-2 text-right border border-gray-300 dark:border-gray-700">
+                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
                       {averages?.[index - 1]?.toFixed(2) || "-"}
                     </td>
                   </tr>
