@@ -9,13 +9,11 @@ function DataPointMaximum() {
   const [maxPoints, setMaxPoints] = useState<number>(
     DEFAULT_DATA_POINT_MAXIMUM
   );
-  const [savedMaxPoints, setSavedMaxPoints] = useState<number | null>(null);
 
   // Load max points value from localStorage on component mount
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
     if (storedMaxPoints) {
-      setSavedMaxPoints(parseFloat(storedMaxPoints));
       setMaxPoints(parseFloat(storedMaxPoints));
     }
   }, []);
@@ -48,23 +46,6 @@ function DataPointMaximum() {
           Save
         </button>
       </div>
-
-      {savedMaxPoints !== null && (
-        <div className="mt-2">
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Retrieved max points from localStorage:{" "}
-            <span className="font-semibold">{savedMaxPoints}</span>
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Access this in other components with:
-            <br />
-            <code className="bg-gray-200 dark:bg-gray-600 px-1 rounded dark:text-gray-200">
-              const maxPoints =
-              parseFloat(localStorage.getItem("dataPointMaximum") || "50");
-            </code>
-          </p>
-        </div>
-      )}
     </div>
   );
 }

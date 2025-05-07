@@ -6,6 +6,7 @@ import { darkColors, lightColors } from "~/constants/colors";
 import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
+import { DEFAULT_DATA_POINT_MAXIMUM } from "~/routes/home";
 
 const dummyPlugin = (): uPlot.Plugin => ({
   hooks: {
@@ -22,6 +23,15 @@ export type SensorGraphProps = {
 };
 
 export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
+  const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
+  const maximumDataPoints = maximumDataPointsRef.current;
+  console.log("mxdp-", maximumDataPoints);
+  useEffect(() => {
+    const storedMaxPoints = localStorage.getItem("dataPointMaximum");
+    if (storedMaxPoints) {
+      maximumDataPointsRef.current = parseFloat(storedMaxPoints);
+    }
+  }, []);
   const oneToTen = [...Array(10)].map((_, i) => i + 1);
   const isDarkMode = useIsDarkMode();
 
@@ -211,14 +221,14 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
             bufferData,
             curr
           );
-          const MAXIMUM_POINT_WINDOW = 10000;
 
-          if (newData[0].length > MAXIMUM_POINT_WINDOW) {
+          if (newData[0].length > maximumDataPointsRef.current) {
             if (!windowed) {
               var indicesToDelete: Set<number> = new Set();
               const secondsSpan =
                 newData[0][newData[0].length - 1] - newData[0][0];
-              const desiredPointDensity = secondsSpan / MAXIMUM_POINT_WINDOW;
+              const desiredPointDensity =
+                secondsSpan / maximumDataPointsRef.current;
               console.log(
                 "diagtime-desiredPointDensityMs",
                 desiredPointDensity * 1000
@@ -250,7 +260,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
               // If we're in windowed mode, we want to keep the last 1000 points
               newData = newData.map((xOrYArray) =>
                 xOrYArray.slice(
-                  Math.max(0, xOrYArray.length - MAXIMUM_POINT_WINDOW)
+                  Math.max(0, xOrYArray.length - maximumDataPointsRef.current)
                 )
               );
             }
