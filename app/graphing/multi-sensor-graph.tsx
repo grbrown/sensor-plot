@@ -7,10 +7,9 @@ import {
   convertMultiProducerDataToUPlotArrayAndAppend,
   type MultiLinePlotData,
 } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
-import { DEFAULT_DATA_POINT_MAXIMUM } from "~/routes/home";
+import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
 
 export type SensorGraphProps = {
-  live?: boolean;
   windowed?: boolean;
 };
 
@@ -27,7 +26,12 @@ const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   }
 };
 
-export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
+/**
+ * Graph which connects to 10 producers and displays their data in a multi-line format.
+ * Self limits datapoint count via `dataPointMaximum` localStorage value.
+ * @param windowed - If true, the graph will display a time window of data points.
+ */
+export function MultiSensorGraph({ windowed = false }: SensorGraphProps) {
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
