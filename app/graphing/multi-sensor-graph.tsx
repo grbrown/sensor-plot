@@ -48,6 +48,33 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     useMemo(
       () => ({
         title: "Chart",
+        // axes: [{ stroke: !colorScheme ? "#000000" : "#FFFFFF" }],
+        axes: [
+          {
+            // x-axis (index 0)
+            grid: {
+              stroke: "#dddddd", // Light gray for x-axis gridlines
+              width: 1, // Line width
+            },
+            ticks: {
+              stroke: "#cccccc", // Color for tick marks
+              width: 1, // Tick width
+            },
+            stroke: "#000000", // Axis line color
+          },
+          {
+            // y-axis (index 1)
+            grid: {
+              stroke: "#dddddd", // Light gray for y-axis gridlines
+              width: 1, // Line width
+            },
+            ticks: {
+              stroke: "#cccccc", // Color for tick marks
+              width: 1, // Tick width
+            },
+            stroke: "#000000", // Axis line color
+          },
+        ],
         width: 400,
         height: 300,
         series: [
