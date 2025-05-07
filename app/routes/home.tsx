@@ -70,6 +70,7 @@ export default function Home() {
         Collect data until datapoint maximum reached, then trim resolution from
         the data set to maintain consistent dataset size
       </p>
+      <br></br>
       <a
         className="text-blue-600 hover:text-blue-800 hover:underline"
         href="/multi-sensor-live-windowed"
@@ -81,6 +82,7 @@ export default function Home() {
         time window
       </p>
 
+      <br></br>
       <DataPointMaximum />
     </div>
   );
