@@ -22,6 +22,17 @@ export type SensorGraphProps = {
   windowed?: boolean;
 };
 
+const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
+  if (windowed) {
+    return (
+      "Time-Windowed Multi Sensor Graph - Maximum Data Points: " +
+      maximumDataPointValue
+    );
+  } else {
+    return "Multi Sensor Graph - Maximum Data Points: " + maximumDataPointValue;
+  }
+};
+
 export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
   const maximumDataPoints = maximumDataPointsRef.current;
@@ -30,6 +41,12 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
     if (storedMaxPoints) {
       maximumDataPointsRef.current = parseFloat(storedMaxPoints);
+      setOptions((prev) => ({
+        ...prev,
+        title:
+          "Multi Sensor Graph - Maximum Data Points: " +
+          maximumDataPointsRef.current,
+      }));
     }
   }, []);
   const oneToTen = [...Array(10)].map((_, i) => i + 1);
@@ -89,7 +106,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
-        title: "Chart",
+        title: "Multi Sensor Graph Maximum Data Points " + maximumDataPoints,
         ...colorSchemeOptions,
         width: 400,
         height: 300,
