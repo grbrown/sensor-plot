@@ -93,8 +93,30 @@ export const convertMultiProducerDataToUPlotArrayAndAppend = (
   //const currDataCopy = [...currData];
   console.log("totalTimeError", totalTimeError);
   const newPoints = [canonicalXPoints, ...dataY] as MultiLinePlotData;
+
   const ret = currData.map((curr, index) => {
     return [...curr, ...newPoints[index]];
   }) as MultiLinePlotData;
+
+  if (ret[0].length > 20) {
+    const oneToTen = [...Array(10)].map((_, i) => i + 1);
+    const firstTenPointDeltas = oneToTen.map((curr) => {
+      const currTs = ret[0][curr];
+      const nextTs = ret[0][curr + 1];
+      const timeDelta = Math.abs(nextTs - currTs);
+      return timeDelta;
+    });
+
+    const lastTenPointDeltas = oneToTen.map((curr) => {
+      const nextTs = ret[0][ret[0].length - curr];
+      const currTs = ret[0][ret[0].length - (curr + 1)];
+      const timeDelta = Math.abs(nextTs - currTs);
+      return timeDelta;
+    });
+
+    console.log("diagtime-firstTenPointDeltas", firstTenPointDeltas);
+    console.log("diagtime-lastTenPointDeltas", lastTenPointDeltas);
+    console.log("diagtime-ret", ret);
+  }
   return ret;
 };
