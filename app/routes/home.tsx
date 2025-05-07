@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
 import { useState, useEffect } from "react";
 
-export const DEFAULT_DATA_POINT_MAXIMUM = 10000;
+export const DEFAULT_DATA_POINT_MAXIMUM = 100000;
 
 function DataPointMaximum() {
   const [maxPoints, setMaxPoints] = useState<number>(
