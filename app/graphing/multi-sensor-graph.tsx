@@ -170,7 +170,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const producer8DataRef = useRef<ProducerData[]>([]);
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
-  const lastPointSetterTs = useRef<number>(0);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
@@ -190,14 +189,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
         producer9DataRef.current,
         producer10DataRef.current,
       ];
-      if (
-        !producersData.find(
-          (pd) =>
-            pd.length === 0 &&
-            lastPointSetterTs.current + 1000 > new Date().getTime()
-        )
-      ) {
-        lastPointSetterTs.current = new Date().getTime();
+      if (!producersData.find((pd) => pd.length === 0)) {
         const prod1StartLen = producer1DataRef.current.length;
         const bufferMinLength = Math.min(
           ...producersData.map((pd) => pd.length)
@@ -265,7 +257,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/2`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -273,7 +265,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     };
   }, []);
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/3`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -282,7 +274,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/4`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -291,7 +283,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/5`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -300,7 +292,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/6`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -309,7 +301,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/7`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -318,7 +310,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/8`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -327,7 +319,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, []);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/9`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
@@ -338,7 +330,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const dataLength = graphData[0].length;
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+    const socket = new WebSocket(`ws://localhost:8000/producer/10`);
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
