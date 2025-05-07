@@ -117,8 +117,8 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
           setScale: [
             (u) => {
               // Get x-scale min/max
-              const xScaleMin = u.scales.x.min;
-              const xScaleMax = u.scales.x.max;
+              const xScaleMin = u.scales.x.min!;
+              const xScaleMax = u.scales.x.max!;
 
               // Get full data range
               const xData = u.data[0];
@@ -405,7 +405,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
         key="hooks-key"
         setOptions={setOptions}
         options={options}
-        data={plotData}
+        data={plotData as uPlot.AlignedData}
       />
 
       <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
