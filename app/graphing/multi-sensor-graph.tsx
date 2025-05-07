@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type ProducerData } from "~/hooks/useProducer";
 import "uplot/dist/uPlot.min.css";
-import { useColorScheme } from "~/hooks/useColorScheme";
+import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
 import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
@@ -22,7 +22,7 @@ export type SensorGraphProps = {
 
 export function MultiSensorGraph({ live }: SensorGraphProps) {
   const oneToTen = [...Array(10)].map((_, i) => i + 1);
-  const colorScheme = useColorScheme();
+  const isDarkMode = useIsDarkMode();
 
   // Track whether we're in a zoomed state
   const needsZoomReset = useRef(false);
@@ -44,11 +44,11 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
-  const colorSchemeOptions = colorScheme
+  const colorSchemeOptions = isDarkMode
     ? {
         axes: [
           {
-            // x-axis (index 0)
+            // x-axis
             grid: {
               stroke: "#607d8b",
               width: 1,
@@ -60,7 +60,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             stroke: "#c7d0d9",
           },
           {
-            // y-axis (index 1)
+            // y-axis
             grid: {
               stroke: "#607d8b",
               width: 1,
@@ -79,7 +79,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     useMemo(
       () => ({
         title: "Chart",
-        // axes: [{ stroke: !colorScheme ? "#000000" : "#FFFFFF" }],
         ...colorSchemeOptions,
         width: 400,
         height: 300,
@@ -90,7 +89,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           ...oneToTen.map((i) => ({
             label: "Value" + i,
             points: { show: false },
-            stroke: colorScheme ? darkColors[i - 1] : lightColors[i - 1],
+            stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
           })),
         ],
         plugins: [dummyPlugin()],

@@ -3,7 +3,7 @@ import { useProducer } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
-import { useColorScheme } from "~/hooks/useColorScheme";
+import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
 
 const loadStartTime = performance.now();
@@ -23,7 +23,7 @@ export type SensorGraphProps = {
 };
 
 export function SensorGraph({ sensorNum, live }: SensorGraphProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useIsDarkMode();
   const color = colorScheme
     ? darkColors[sensorNum - 1]
     : lightColors[sensorNum - 1];
