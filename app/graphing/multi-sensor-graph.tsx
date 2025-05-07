@@ -44,10 +44,43 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
+  const colorSchemeOptions = colorScheme
+    ? {
+        axes: [
+          {
+            // x-axis (index 0)
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+          {
+            // y-axis (index 1)
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+        ],
+      }
+    : {};
+
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
         title: "Chart",
+        // axes: [{ stroke: !colorScheme ? "#000000" : "#FFFFFF" }],
+        ...colorSchemeOptions,
         width: 400,
         height: 300,
         series: [
