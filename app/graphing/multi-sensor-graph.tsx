@@ -29,8 +29,6 @@ const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
 
 export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
-  const maximumDataPoints = maximumDataPointsRef.current;
-  console.log("mxdp-", maximumDataPoints);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
     if (storedMaxPoints) {
@@ -118,7 +116,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
           // Track when user zooms in
           setScale: [
             (u) => {
-              console.log("hook-setScale");
               // Get x-scale min/max
               const xScaleMin = u.scales.x.min;
               const xScaleMax = u.scales.x.max;
@@ -152,7 +149,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
 
           setSelect: [
             (u) => {
-              console.log("hook-setSelect");
               if (scaleStateRef.current != null) {
                 scaleStateRef.current = null;
               }
@@ -203,7 +199,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
       ) {
         lastPointSetterTs.current = new Date().getTime();
         const prod1StartLen = producer1DataRef.current.length;
-        console.log("diag- producer1 length", producer1DataRef.current.length);
         const bufferMinLength = Math.min(
           ...producersData.map((pd) => pd.length)
         );
@@ -211,20 +206,13 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
         producersData.forEach((pd) => {
           bufferData.push(pd.splice(0, bufferMinLength));
         });
-        console.log("diag- bufferDataLength", bufferData[0].length);
-        console.log(
-          "diag- producer1 length after splice",
-          producer1DataRef.current.length
-        );
+        //todo: evaluate this code
         const prod1EndLen = producer1DataRef.current.length;
         if (prod1StartLen - bufferData[0].length !== prod1EndLen) {
           console.error("diag- producer1 length mismatch");
         }
         setGraphData((curr) => {
-          console.log(
-            "diag- starting point setter curr length ",
-            curr[0].length
-          );
+          //todo factor into method
           var newData = convertMultiProducerDataToUPlotArrayAndAppend(
             bufferData,
             curr
@@ -237,11 +225,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                 newData[0][newData[0].length - 1] - newData[0][0];
               const desiredPointDensity =
                 secondsSpan / maximumDataPointsRef.current;
-              console.log(
-                "diagtime-desiredPointDensityMs",
-                desiredPointDensity * 1000
-              );
-              console.log("diagtime-secondsSpan", secondsSpan);
+
               var currTs = newData[0][0];
               newData[0].forEach((curr, index) => {
                 if (index === 0) {
@@ -273,35 +257,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
               );
             }
           }
-          console.log(
-            "diag- finished point setter curr length ",
-            newData[0].length
-          );
-          console.log(
-            "diag- finished point setter buffer length ",
-            newData[0].length
-          );
 
-          if (newData[0].length > 20) {
-            const oneToTen = [...Array(10)].map((_, i) => i + 1);
-            const firstTenPointDeltas = oneToTen.map((curr) => {
-              const currTs = newData[0][curr];
-              const nextTs = newData[0][curr + 1];
-              const timeDelta = Math.abs(nextTs - currTs);
-              return timeDelta * 1000;
-            });
-
-            const lastTenPointDeltas = oneToTen.map((curr) => {
-              const nextTs = newData[0][newData[0].length - curr];
-              const currTs = newData[0][newData[0].length - (curr + 1)];
-              const timeDelta = Math.abs(nextTs - currTs);
-              return timeDelta * 1000;
-            });
-
-            console.log("diagtime-firstTenPointDeltasMs", firstTenPointDeltas);
-            console.log("diagtime-lastTenPointDeltasMs", lastTenPointDeltas);
-            console.log("diagtime-retS", newData[0]);
-          }
           return newData;
         });
       }
@@ -409,9 +365,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     return zoomedData;
   })();
 
-  if (zoomedData !== null) {
-    console.log("zoomedData", zoomedData);
-  }
   const plotData = zoomedData ?? graphData;
 
   const averages = zoomedData?.slice(1).map((arr) => {
