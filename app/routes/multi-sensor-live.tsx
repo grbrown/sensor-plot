@@ -1,4 +1,4 @@
-import { MultiSensorGraph } from "~/graphing/multi-sensor-graph";
+import { MultiSensorGraph } from "~/graphing/MultiSensorGraph";
 
 export default function MultiSensorLive() {
   return <MultiSensorGraph />;
