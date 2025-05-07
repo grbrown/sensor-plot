@@ -182,10 +182,11 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             "diag- starting point setter curr length ",
             curr[0].length
           );
-          const newData = convertMultiProducerDataToUPlotArrayAndAppend(
+          var newData = convertMultiProducerDataToUPlotArrayAndAppend(
             bufferData,
             curr
           );
+          //var newDataFiltered;
           const MAXIMUM_POINT_WINDOW = 10000;
 
           if (
@@ -193,9 +194,15 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             lastPointCullingTs.current + 5000 < new Date().getTime()
           ) {
             lastPointCullingTs.current = new Date().getTime();
-            var indicesToDelete: number[] = [];
-            const msSpan = newData[0][newData[0].length - 1] - newData[0][0];
-            const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
+            var indicesToDelete: Set<number> = new Set();
+            const secondsSpan =
+              newData[0][newData[0].length - 1] - newData[0][0];
+            const desiredPointDensity = secondsSpan / MAXIMUM_POINT_WINDOW;
+            console.log(
+              "diagtime-desiredPointDensityMs",
+              desiredPointDensity * 1000
+            );
+            console.log("diagtime-secondsSpan", secondsSpan);
             var currTs = newData[0][0];
             newData[0].forEach((curr, index) => {
               if (index === 0) {
@@ -208,17 +215,22 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
 
               const timeDelta = Math.abs(nextTs - currTs);
               if (timeDelta < desiredPointDensity) {
-                indicesToDelete.push(index);
+                indicesToDelete.add(index);
               } else {
                 currTs = nextTs;
               }
             });
-            indicesToDelete.forEach((currIndex) => {
-              newData.forEach((curr) => {
-                curr.splice(currIndex, 1);
-              });
-            });
-            console.log("diag- deleted ", indicesToDelete.length + " points");
+            newData = newData.map((xOrYArray) =>
+              xOrYArray.filter((_, index) => {
+                return !indicesToDelete.has(index);
+              })
+            );
+            // indicesToDelete.forEach((currIndex) => {
+            //   newData.forEach((curr) => {
+            //     curr.splice(currIndex, 1);
+            //   });
+            // });
+            //console.log("diag- deleted ", indicesToDelete.length + " points");
           }
           console.log(
             "diag- finished point setter curr length ",
@@ -226,8 +238,29 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
           );
           console.log(
             "diag- finished point setter buffer length ",
-            bufferData[0].length
+            newData[0].length
           );
+
+          if (newData[0].length > 20) {
+            const oneToTen = [...Array(10)].map((_, i) => i + 1);
+            const firstTenPointDeltas = oneToTen.map((curr) => {
+              const currTs = newData[0][curr];
+              const nextTs = newData[0][curr + 1];
+              const timeDelta = Math.abs(nextTs - currTs);
+              return timeDelta * 1000;
+            });
+
+            const lastTenPointDeltas = oneToTen.map((curr) => {
+              const nextTs = newData[0][newData[0].length - curr];
+              const currTs = newData[0][newData[0].length - (curr + 1)];
+              const timeDelta = Math.abs(nextTs - currTs);
+              return timeDelta * 1000;
+            });
+
+            console.log("diagtime-firstTenPointDeltasMs", firstTenPointDeltas);
+            console.log("diagtime-lastTenPointDeltasMs", lastTenPointDeltas);
+            console.log("diagtime-retS", newData[0]);
+          }
           return newData;
         });
       }
