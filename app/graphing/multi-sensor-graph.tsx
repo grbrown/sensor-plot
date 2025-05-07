@@ -44,37 +44,43 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
+  const colorSchemeOptions = colorScheme
+    ? {
+        axes: [
+          {
+            // x-axis (index 0)
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+          {
+            // y-axis (index 1)
+            grid: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            ticks: {
+              stroke: "#607d8b",
+              width: 1,
+            },
+            stroke: "#c7d0d9",
+          },
+        ],
+      }
+    : {};
+
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
         title: "Chart",
         // axes: [{ stroke: !colorScheme ? "#000000" : "#FFFFFF" }],
-        axes: [
-          {
-            // x-axis (index 0)
-            grid: {
-              stroke: "#dddddd", // Light gray for x-axis gridlines
-              width: 1, // Line width
-            },
-            ticks: {
-              stroke: "#cccccc", // Color for tick marks
-              width: 1, // Tick width
-            },
-            stroke: "#000000", // Axis line color
-          },
-          {
-            // y-axis (index 1)
-            grid: {
-              stroke: "#dddddd", // Light gray for y-axis gridlines
-              width: 1, // Line width
-            },
-            ticks: {
-              stroke: "#cccccc", // Color for tick marks
-              width: 1, // Tick width
-            },
-            stroke: "#000000", // Axis line color
-          },
-        ],
+        ...colorSchemeOptions,
         width: 400,
         height: 300,
         series: [
