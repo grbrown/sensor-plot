@@ -40,7 +40,7 @@ export function AutoResizeUPlotReact({
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "90vh" }} ref={chartRef}>
+    <div className="w-full h-[90vh]" ref={chartRef}>
       <UPlotReact {...props} />
     </div>
   );
