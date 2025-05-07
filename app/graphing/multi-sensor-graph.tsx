@@ -43,9 +43,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
       maximumDataPointsRef.current = parseFloat(storedMaxPoints);
       setOptions((prev) => ({
         ...prev,
-        title:
-          "Multi Sensor Graph - Maximum Data Points: " +
-          maximumDataPointsRef.current,
+        title: getGraphTitle(windowed, maximumDataPointsRef.current),
       }));
     }
   }, []);
@@ -106,7 +104,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   const [options, setOptions] = useState<uPlot.Options>(
     useMemo(
       () => ({
-        title: "Multi Sensor Graph Maximum Data Points " + maximumDataPoints,
+        title: getGraphTitle(windowed, maximumDataPointsRef.current),
         ...colorSchemeOptions,
         width: 400,
         height: 300,
