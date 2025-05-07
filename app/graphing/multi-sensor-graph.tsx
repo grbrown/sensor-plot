@@ -327,8 +327,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
     };
   }, []);
 
-  const dataLength = graphData[0].length;
-
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/10`);
 
@@ -385,22 +383,13 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
   }, [zoomEnabled]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "nowrap",
-      }}
-    >
+    <div className="w-full flex flex-row flex-nowrap">
       <AutoResizeUPlotReact
         key="hooks-key"
         setOptions={setOptions}
         options={options}
         data={plotData as uPlot.AlignedData}
       />
-
-      <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
       {zoomEnabled && (
         <div className="w-[400px]">
           <button
@@ -411,6 +400,7 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
                 width: prev.width + 300,
               }));
             }}
+            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Reset zoom
           </button>
