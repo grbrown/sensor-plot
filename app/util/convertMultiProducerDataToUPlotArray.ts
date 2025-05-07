@@ -1,5 +1,7 @@
 import type { ProducerData } from "~/hooks/useProducer";
 
+const MAXIMUM_POINT_WINDOW = 500;
+
 export type MultiLinePlotData = number[][];
 
 export const convertMultiProducerDataToUPlotArray = (
@@ -13,6 +15,51 @@ export const convertMultiProducerDataToUPlotArray = (
     }
     return ret;
   }
+
+  var indicesToDelete: number[] = [];
+
+  const minimumFilledData = producerData
+    .map((pd, index) => ({ length: pd.length, index }))
+    .sort((pd1, pd2) => pd1.length - pd2.length)[0];
+  const minFilledDataIndex = minimumFilledData.index;
+
+  if (minimumFilledData.length > MAXIMUM_POINT_WINDOW) {
+    var currTs = new Date(
+      producerData[minFilledDataIndex][0].timestamp
+    ).getTime();
+    const msSpan =
+      new Date(
+        producerData[minFilledDataIndex][
+          producerData[minFilledDataIndex].length - 1
+        ].timestamp
+      ).getTime() -
+      new Date(producerData[minFilledDataIndex][0].timestamp).getTime();
+    const desiredPointDensity = msSpan / MAXIMUM_POINT_WINDOW;
+    producerData[minFilledDataIndex].forEach((curr, index) => {
+      if (index === 0) {
+        return;
+      }
+      if (index >= producerData[minFilledDataIndex].length) {
+        return;
+      }
+
+      const nextTs = new Date(curr.timestamp).getTime();
+
+      const timeDelta = Math.abs(nextTs - currTs);
+      if (timeDelta < desiredPointDensity) {
+        indicesToDelete.push(index);
+      } else {
+        currTs = nextTs;
+      }
+    });
+  }
+  const producerDataCopy = [...producerData];
+  indicesToDelete.forEach((currIndex) => {
+    producerDataCopy.forEach((curr) => {
+      curr.splice(currIndex, 1);
+    });
+  });
+  producerData = producerDataCopy;
   const canonicalXPoints = producerData[0].map((curr) => {
     const unixTs = new Date(curr.timestamp).getTime() / 1000;
     return unixTs;

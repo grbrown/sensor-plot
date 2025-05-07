@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useProducer } from "~/hooks/useProducer";
+import { useProducer, type ProducerData } from "~/hooks/useProducer";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { darkColors, lightColors } from "~/constants/colors";
-import { convertMultiProducerDataToUPlotArray } from "~/util/convertMultiProducerDataToUPlotArray";
+import {
+  convertMultiProducerDataToUPlotArray,
+  type MultiLinePlotData,
+} from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
+import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 
 const loadStartTime = performance.now();
 
@@ -29,6 +33,20 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
 
   // Track whether we're in a zoomed state
   const needsZoomReset = useRef(false);
+
+  const [graphData, setGraphData] = useState<MultiLinePlotData>([
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ]);
 
   // Store the current scale state
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
@@ -101,57 +119,263 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       []
     )
   );
-  const producer1Data = useProducer("1", live);
-  const producer2Data = useProducer("2", live);
-  const producer3Data = useProducer("3", live);
-  const producer4Data = useProducer("4", live);
-  const producer5Data = useProducer("5", live);
-  const producer6Data = useProducer("6", live);
-  const producer7Data = useProducer("7", live);
-  const producer8Data = useProducer("8", live);
-  const producer9Data = useProducer("9", live);
-  const producer10Data = useProducer("10", live);
-  const producersData = [
-    producer1Data,
-    producer2Data,
-    producer3Data,
-    producer4Data,
-    producer5Data,
-    producer6Data,
-    producer7Data,
-    producer8Data,
-    producer9Data,
-    producer10Data,
-  ];
-  // useProducer("2");
-  // useProducer("3");
-  // useProducer("4");
-  // if (producer1Data !== undefined) {
-  //   debugger;
-  // }
 
-  console.log("datapointCount", producer1Data.length);
-  const dataSamplingTime = performance.now();
-  console.log(
-    "DataSamplingRateAvg",
-    (1000 * producer1Data.length) / (dataSamplingTime - loadStartTime)
-  );
+  const producer1DataRef = useRef<ProducerData[]>([]);
+  const producer2DataRef = useRef<ProducerData[]>([]);
+  const producer3DataRef = useRef<ProducerData[]>([]);
+  const producer4DataRef = useRef<ProducerData[]>([]);
+  const producer5DataRef = useRef<ProducerData[]>([]);
+  const producer6DataRef = useRef<ProducerData[]>([]);
+  const producer7DataRef = useRef<ProducerData[]>([]);
+  const producer8DataRef = useRef<ProducerData[]>([]);
+  const producer9DataRef = useRef<ProducerData[]>([]);
+  const producer10DataRef = useRef<ProducerData[]>([]);
+  const lastPointCullingTs = useRef<number>(0);
+  const lastPointSetterTs = useRef<number>(0);
 
-  const data = convertMultiProducerDataToUPlotArray(producersData);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer1DataRef.current = [...producer1DataRef.current, ...dataArray];
+      const producersData = [
+        producer1DataRef.current,
+        producer2DataRef.current,
+        producer3DataRef.current,
+        producer4DataRef.current,
+        producer5DataRef.current,
+        producer6DataRef.current,
+        producer7DataRef.current,
+        producer8DataRef.current,
+        producer9DataRef.current,
+        producer10DataRef.current,
+      ];
+      if (
+        !producersData.find(
+          (pd) =>
+            pd.length === 0 &&
+            lastPointSetterTs.current + 1000 > new Date().getTime()
+        )
+      ) {
+        lastPointSetterTs.current = new Date().getTime();
+        const prod1StartLen = producer1DataRef.current.length;
+        console.log("diag- producer1 length", producer1DataRef.current.length);
+        const bufferMinLength = Math.min(
+          ...producersData.map((pd) => pd.length)
+        );
+        const bufferData: ProducerData[][] = [];
+        producersData.forEach((pd) => {
+          bufferData.push(pd.splice(0, bufferMinLength));
+        });
+        console.log("diag- bufferDataLength", bufferData[0].length);
+        console.log(
+          "diag- producer1 length after splice",
+          producer1DataRef.current.length
+        );
+        const prod1EndLen = producer1DataRef.current.length;
+        if (prod1StartLen - bufferData[0].length !== prod1EndLen) {
+          console.error("diag- producer1 length mismatch");
+        }
+        setGraphData((curr) => {
+          console.log(
+            "diag- starting point setter curr length ",
+            curr[0].length
+          );
+          var newData = convertMultiProducerDataToUPlotArrayAndAppend(
+            bufferData,
+            curr
+          );
+          //var newDataFiltered;
+          const MAXIMUM_POINT_WINDOW = 1000;
+
+          if (
+            newData[0].length > MAXIMUM_POINT_WINDOW
+            // &&
+            // lastPointCullingTs.current + 5000 < new Date().getTime()
+          ) {
+            lastPointCullingTs.current = new Date().getTime();
+            var indicesToDelete: Set<number> = new Set();
+            const secondsSpan =
+              newData[0][newData[0].length - 1] - newData[0][0];
+            const desiredPointDensity = secondsSpan / MAXIMUM_POINT_WINDOW;
+            console.log(
+              "diagtime-desiredPointDensityMs",
+              desiredPointDensity * 1000
+            );
+            console.log("diagtime-secondsSpan", secondsSpan);
+            var currTs = newData[0][0];
+            newData[0].forEach((curr, index) => {
+              if (index === 0) {
+                return;
+              }
+              if (index >= newData[0].length) {
+                return;
+              }
+              const nextTs = curr;
+
+              const timeDelta = Math.abs(nextTs - currTs);
+              if (timeDelta < desiredPointDensity) {
+                indicesToDelete.add(index);
+              } else {
+                currTs = nextTs;
+              }
+            });
+            newData = newData.map((xOrYArray) =>
+              xOrYArray.filter((_, index) => {
+                return !indicesToDelete.has(index);
+              })
+            );
+            // indicesToDelete.forEach((currIndex) => {
+            //   newData.forEach((curr) => {
+            //     curr.splice(currIndex, 1);
+            //   });
+            // });
+            //console.log("diag- deleted ", indicesToDelete.length + " points");
+          }
+          console.log(
+            "diag- finished point setter curr length ",
+            newData[0].length
+          );
+          console.log(
+            "diag- finished point setter buffer length ",
+            newData[0].length
+          );
+
+          if (newData[0].length > 20) {
+            const oneToTen = [...Array(10)].map((_, i) => i + 1);
+            const firstTenPointDeltas = oneToTen.map((curr) => {
+              const currTs = newData[0][curr];
+              const nextTs = newData[0][curr + 1];
+              const timeDelta = Math.abs(nextTs - currTs);
+              return timeDelta * 1000;
+            });
+
+            const lastTenPointDeltas = oneToTen.map((curr) => {
+              const nextTs = newData[0][newData[0].length - curr];
+              const currTs = newData[0][newData[0].length - (curr + 1)];
+              const timeDelta = Math.abs(nextTs - currTs);
+              return timeDelta * 1000;
+            });
+
+            console.log("diagtime-firstTenPointDeltasMs", firstTenPointDeltas);
+            console.log("diagtime-lastTenPointDeltasMs", lastTenPointDeltas);
+            console.log("diagtime-retS", newData[0]);
+          }
+          return newData;
+        });
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer2DataRef.current = [...producer2DataRef.current, ...dataArray];
+    };
+  }, []);
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer3DataRef.current = [...producer3DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer4DataRef.current = [...producer4DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer5DataRef.current = [...producer5DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer6DataRef.current = [...producer6DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer7DataRef.current = [...producer7DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer8DataRef.current = [...producer8DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+      producer9DataRef.current = [...producer9DataRef.current, ...dataArray];
+    };
+  }, []);
+
+  //const [dataLength, setDataLength] = useState(0);
+  const dataLength = graphData[0].length;
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://localhost:8000/producer/1`);
+
+    socket.onmessage = (event) => {
+      const dataArray = JSON.parse(event.data);
+
+      producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
+      //setDataLength(producer10DataRef.current.length);
+    };
+  }, []);
+
+  // const producer2Data = useProducer("2", live);
+  // const producer3Data = useProducer("3", live);
+  // const producer4Data = useProducer("4", live);
+  // const producer5Data = useProducer("5", live);
+  // const producer6Data = useProducer("6", live);
+  // const producer7Data = useProducer("7", live);
+  // const producer8Data = useProducer("8", live);
+  // const producer9Data = useProducer("9", live);
+  // const producer10Data = useProducer("10", live);
 
   const zoomEnabled = scaleStateRef.current !== null;
   const zoomedData = (() => {
     if (needsZoomReset.current) {
-      return data;
+      return graphData;
     }
     if (!zoomEnabled) {
       return null;
     }
     const xScaleMin = scaleStateRef.current!.min;
     const xScaleMax = scaleStateRef.current!.max;
-    const startPointIndex = data[0].findIndex((x) => x >= xScaleMin);
-    const endPointIndex = data[0].findIndex((x) => x >= xScaleMax);
-    const zoomedData = data.map((arr) =>
+    const startPointIndex = graphData[0].findIndex((x) => x >= xScaleMin);
+    const endPointIndex = graphData[0].findIndex((x) => x >= xScaleMax);
+    const zoomedData = graphData.map((arr) =>
       arr.slice(startPointIndex, endPointIndex)
     );
     return zoomedData;
@@ -160,7 +384,7 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   if (zoomedData !== null) {
     console.log("zoomedData", zoomedData);
   }
-  const plotData = zoomedData ?? data;
+  const plotData = zoomedData ?? graphData;
 
   const averages = zoomedData?.slice(1).map((arr) => {
     return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
@@ -205,6 +429,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
         onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
       />
+
+      <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
       {zoomEnabled && (
         <div className="w-[400px]">
           <button
