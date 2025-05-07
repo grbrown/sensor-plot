@@ -25,7 +25,7 @@ export type SensorGraphProps = {
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
     return (
-      "Time-Windowed Multi Sensor Graph - Maximum Data Points: " +
+      "Multi Sensor Graph, Time Windowed - Maximum Data Points: " +
       maximumDataPointValue
     );
   } else {
