@@ -28,6 +28,10 @@ function DataPointMaximum() {
       <h2 className="text-lg font-semibold mb-2 dark:text-white">
         Data Point Maximum
       </h2>
+      <p className="text-xs text-gray-600 mb-2">
+        Beyond this limit, graphs will discard points. Use this to prevent
+        crashes. Note: one point represents 10 producer values.
+      </p>
 
       <div className="flex mb-4">
         <input
