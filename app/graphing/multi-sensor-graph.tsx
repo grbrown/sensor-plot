@@ -1,18 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useProducer, type ProducerData } from "~/hooks/useProducer";
-import UPlotReact from "uplot-react";
+import { type ProducerData } from "~/hooks/useProducer";
 import "uplot/dist/uPlot.min.css";
-import { convertProducerDataToUPlotArray } from "~/util/convertProducerDataToUPlotArray";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { darkColors, lightColors } from "~/constants/colors";
-import {
-  convertMultiProducerDataToUPlotArray,
-  type MultiLinePlotData,
-} from "~/util/convertMultiProducerDataToUPlotArray";
+import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
-
-const loadStartTime = performance.now();
 
 const dummyPlugin = (): uPlot.Plugin => ({
   hooks: {
@@ -130,7 +123,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
   const producer8DataRef = useRef<ProducerData[]>([]);
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
-  const lastPointCullingTs = useRef<number>(0);
   const lastPointSetterTs = useRef<number>(0);
 
   useEffect(() => {
@@ -186,15 +178,9 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
             bufferData,
             curr
           );
-          //var newDataFiltered;
           const MAXIMUM_POINT_WINDOW = 1000;
 
-          if (
-            newData[0].length > MAXIMUM_POINT_WINDOW
-            // &&
-            // lastPointCullingTs.current + 5000 < new Date().getTime()
-          ) {
-            lastPointCullingTs.current = new Date().getTime();
+          if (newData[0].length > MAXIMUM_POINT_WINDOW) {
             var indicesToDelete: Set<number> = new Set();
             const secondsSpan =
               newData[0][newData[0].length - 1] - newData[0][0];
@@ -226,12 +212,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
                 return !indicesToDelete.has(index);
               })
             );
-            // indicesToDelete.forEach((currIndex) => {
-            //   newData.forEach((curr) => {
-            //     curr.splice(currIndex, 1);
-            //   });
-            // });
-            //console.log("diag- deleted ", indicesToDelete.length + " points");
           }
           console.log(
             "diag- finished point setter curr length ",
@@ -339,7 +319,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
     };
   }, []);
 
-  //const [dataLength, setDataLength] = useState(0);
   const dataLength = graphData[0].length;
 
   useEffect(() => {
@@ -349,19 +328,8 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
       const dataArray = JSON.parse(event.data);
 
       producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
-      //setDataLength(producer10DataRef.current.length);
     };
   }, []);
-
-  // const producer2Data = useProducer("2", live);
-  // const producer3Data = useProducer("3", live);
-  // const producer4Data = useProducer("4", live);
-  // const producer5Data = useProducer("5", live);
-  // const producer6Data = useProducer("6", live);
-  // const producer7Data = useProducer("7", live);
-  // const producer8Data = useProducer("8", live);
-  // const producer9Data = useProducer("9", live);
-  // const producer10Data = useProducer("10", live);
 
   const zoomEnabled = scaleStateRef.current !== null;
   const zoomedData = (() => {
@@ -425,9 +393,6 @@ export function MultiSensorGraph({ live }: SensorGraphProps) {
         setOptions={setOptions}
         options={options}
         data={plotData}
-        //target={root}
-        onDelete={(/* chart: uPlot */) => console.log("Deleted from hooks")}
-        onCreate={(/* chart: uPlot */) => console.log("Created from hooks")}
       />
 
       <div style={{ position: "relative", right: 80 }}>{dataLength}</div>
