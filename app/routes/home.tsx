@@ -1,6 +1,4 @@
-import { Plots } from "~/welcome/plots";
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
 import { useState, useEffect } from "react";
 
 export const DEFAULT_DATA_POINT_MAXIMUM = 10000;

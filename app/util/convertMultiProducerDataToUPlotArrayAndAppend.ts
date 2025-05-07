@@ -1,4 +1,4 @@
-import type { ProducerData } from "~/hooks/useProducer";
+import type { ProducerData } from "~/graphing/multi-sensor-graph";
 
 export type MultiLinePlotData = number[][];
 

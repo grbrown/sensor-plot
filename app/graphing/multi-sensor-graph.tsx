@@ -1,26 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type ProducerData } from "~/hooks/useProducer";
 import "uplot/dist/uPlot.min.css";
 import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
-import { type MultiLinePlotData } from "~/util/convertMultiProducerDataToUPlotArray";
 import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
-import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
+import {
+  convertMultiProducerDataToUPlotArrayAndAppend,
+  type MultiLinePlotData,
+} from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/routes/home";
-
-const dummyPlugin = (): uPlot.Plugin => ({
-  hooks: {
-    init(u: uPlot, opts: uPlot.Options) {
-      void u;
-      void opts;
-    },
-  },
-});
 
 export type SensorGraphProps = {
   live?: boolean;
   windowed?: boolean;
 };
+
+export type ProducerData = { timestamp: string; value: number };
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -118,7 +112,6 @@ export function MultiSensorGraph({ live, windowed = false }: SensorGraphProps) {
             stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
           })),
         ],
-        plugins: [dummyPlugin()],
         scales: { x: { time: true } },
         // Add custom handling for auto-ranging to preserve zoom
         hooks: {
