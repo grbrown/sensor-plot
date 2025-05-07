@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import UPlotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 
