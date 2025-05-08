@@ -1,4 +1,4 @@
-import { MultiLinePlotData } from "~/types/Graphing";
+import { MultiLinePlotData } from "~/types/graphing";
 
 /**
  * Limits the number of data points in a multi-line plot dataset.

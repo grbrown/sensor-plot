@@ -5,7 +5,7 @@ import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMul
 import { limitDataPoints } from "~/util/limitDataPoints";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
 import { type ProducerData } from "~/types/producerData";
-import { MultiLinePlotData } from "~/types/Graphing";
+import { MultiLinePlotData } from "~/types/graphing";
 import { useProducerWebSocketConnectionBuffer } from "~/hooks/useProducerWebSocketConnectionBuffer";
 import { GraphStatisticsTable } from "~/components/graphing/GraphStatisticsTable";
 import { useUPlotOptions } from "~/hooks/useUPlotOptions";

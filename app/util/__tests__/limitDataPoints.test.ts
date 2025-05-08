@@ -1,4 +1,4 @@
-import { MultiLinePlotData } from "~/types/Graphing";
+import { MultiLinePlotData } from "~/types/graphing";
 import { limitDataPoints } from "../limitDataPoints";
 
 describe("limitDataPoints", () => {

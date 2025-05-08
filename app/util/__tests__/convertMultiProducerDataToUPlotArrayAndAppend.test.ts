@@ -1,6 +1,6 @@
 import { ProducerData } from "~/types/producerData";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "../convertMultiProducerDataToUPlotArrayAndAppend";
-import { MultiLinePlotData } from "~/types/Graphing";
+import { MultiLinePlotData } from "~/types/graphing";
 
 describe("convertMultiProducerDataToUPlotArrayAndAppend", () => {
   beforeEach(() => {

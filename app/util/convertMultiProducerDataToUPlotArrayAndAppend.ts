@@ -1,4 +1,4 @@
-import { MultiLinePlotData } from "~/types/Graphing";
+import { MultiLinePlotData } from "~/types/graphing";
 import { ProducerData } from "~/types/producerData";
 
 /**
