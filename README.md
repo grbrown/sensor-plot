@@ -1,6 +1,7 @@
 # Multi Producer Graphing Application
 
-Web app for plotting real time data from producer web sockets. React Router/uPlot FE, Tailwind for styling, Jest/RTL testing
+Web app for plotting real time data from producer web sockets. Two plotting styles are available currently, with options on the home screen. Click and drag to zoom in and view statistics on graph subsections. Plots can be hidden and shown by clicking their name label in the graph legend.
+React Router/uPlot FE, Tailwind for styling, Jest/RTL testing
 
 - [React Router docs](https://reactrouter.com/)
 - [uPlot React docs](https://github.com/leeoniya/uplot-react)
