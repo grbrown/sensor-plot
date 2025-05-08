@@ -37,6 +37,10 @@ To run jest tests, use
 npm run test
 ```
 
+### Code generator tools
+
+Copilot was used to generate some unit tests and assist with styling on table and data point maximum component. It was also used for refactoring some graph code into components/utils, however it was not for core graph functionality.
+
 ### Troubleshooting
 
 This was tested and should work with Node v22.12.0
