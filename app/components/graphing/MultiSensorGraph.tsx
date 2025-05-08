@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "uplot/dist/uPlot.min.css";
-import { useIsDarkMode } from "~/hooks/useIsDarkMode";
-import { darkColors, lightColors } from "~/constants/graphLineColors";
 import { AutoResizeUPlotReact } from "~/components/graphing/AutoResizeUPlotReact";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 import { limitDataPoints } from "~/util/limitDataPoints";
@@ -10,6 +8,7 @@ import { type ProducerData } from "~/types/producerData";
 import { MultiLinePlotData } from "~/types/Graphing";
 import { useProducerWebSocketConnectionBuffer } from "~/hooks/useProducerWebSocketConnectionBuffer";
 import { GraphStatisticsTable } from "~/components/graphing/GraphStatisticsTable";
+import { useUPlotOptions } from "~/hooks/useUPlotOptions";
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -46,7 +45,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
     [],
   ]);
 
-  // Graph options setup
+  // Retrieve maximum data points setting
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
@@ -58,112 +57,19 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
       }));
     }
   }, []);
-  const oneToTen = [...Array(10)].map((_, i) => i + 1);
-  const isDarkMode = useIsDarkMode();
-
-  // Track whether we're in a zoomed state
+  // To force reset zoom state
   const needsZoomReset = useRef(false);
 
   // Store the current scale state (x axis zoom level)
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
-  const colorSchemeOptions = isDarkMode
-    ? {
-        axes: [
-          {
-            // x-axis
-            grid: {
-              stroke: "#607d8b",
-              width: 1,
-            },
-            ticks: {
-              stroke: "#607d8b",
-              width: 1,
-            },
-            stroke: "#c7d0d9",
-          },
-          {
-            // y-axis
-            grid: {
-              stroke: "#607d8b",
-              width: 1,
-            },
-            ticks: {
-              stroke: "#607d8b",
-              width: 1,
-            },
-            stroke: "#c7d0d9",
-          },
-        ],
-      }
-    : {};
-
-  const [options, setOptions] = useState<uPlot.Options>(
-    useMemo(
-      () => ({
-        title: getGraphTitle(windowed, maximumDataPointsRef.current),
-        ...colorSchemeOptions,
-        width: 400,
-        height: 300,
-        series: [
-          {
-            label: "Time",
-          },
-          ...oneToTen.map((i) => ({
-            label: "Producer " + i,
-            points: { show: false },
-            stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
-          })),
-        ],
-        scales: { x: { time: true } },
-        // Add custom handling for auto-ranging to preserve zoom
-        hooks: {
-          // Track when user zooms in
-          setScale: [
-            (u) => {
-              // Get x-scale min/max
-              const xScaleMin = u.scales.x.min!;
-              const xScaleMax = u.scales.x.max!;
-
-              // Get full data range
-              const xData = u.data[0];
-              const dataMin = Math.min(...xData);
-              const dataMax = Math.max(...xData);
-
-              // Check if we're zoomed in (allowing for small floating point differences)
-              const isZoomed =
-                Math.abs(xScaleMin - dataMin) > 0.001 ||
-                Math.abs(xScaleMax - dataMax) > 0.001;
-
-              if (needsZoomReset.current) {
-                needsZoomReset.current = false;
-                scaleStateRef.current = null;
-              } else {
-                if (isZoomed) {
-                  // Save the current scale state
-                  if (!scaleStateRef.current) {
-                    scaleStateRef.current = {
-                      min: xScaleMin,
-                      max: xScaleMax,
-                    };
-                  }
-                }
-              }
-            },
-          ],
-
-          setSelect: [
-            (u) => {
-              if (scaleStateRef.current != null) {
-                scaleStateRef.current = null;
-              }
-            },
-          ],
-        },
-      }),
-      []
-    )
-  );
+  // Get graph options from custom hook
+  const { options, setOptions } = useUPlotOptions({
+    title: getGraphTitle(windowed, maximumDataPointsRef.current),
+    windowed,
+    needsZoomReset,
+    scaleStateRef,
+  });
 
   // Producer data buffers
   const producer1DataBufferRef = useRef<ProducerData[]>([]);
@@ -274,6 +180,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
     return Math.min(...arr);
   });
 
+  // Override 100% graph width temporarily to allow statistics table to be displayed
   useEffect(() => {
     if (zoomEnabled === true) {
       setOptions((prev) => ({
@@ -295,6 +202,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
         <div className="w-[300px] p-2 border-l border-gray-300 dark:border-gray-700 flex flex-col justify-center">
           <button
             onClick={() => {
+              //force reset zoom state, close statistics table
               needsZoomReset.current = true;
               setOptions((prev) => ({
                 ...prev,
