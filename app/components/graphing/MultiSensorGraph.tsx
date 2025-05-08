@@ -7,6 +7,7 @@ import {
   convertMultiProducerDataToUPlotArrayAndAppend,
   type MultiLinePlotData,
 } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
+import { limitDataPoints } from "~/util/limitDataPoints";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
 
 export type SensorGraphProps = {
@@ -214,45 +215,12 @@ export function MultiSensorGraph({ windowed = false }: SensorGraphProps) {
             curr
           );
 
-          if (newData[0].length > maximumDataPointsRef.current) {
-            if (!windowed) {
-              var indicesToDelete: Set<number> = new Set();
-              const secondsSpan =
-                newData[0][newData[0].length - 1] - newData[0][0];
-              const desiredPointDensity =
-                secondsSpan / maximumDataPointsRef.current;
-
-              var currTs = newData[0][0];
-              newData[0].forEach((curr, index) => {
-                if (index === 0) {
-                  return;
-                }
-                if (index >= newData[0].length) {
-                  return;
-                }
-                const nextTs = curr;
-
-                const timeDelta = Math.abs(nextTs - currTs);
-                if (timeDelta < desiredPointDensity) {
-                  indicesToDelete.add(index);
-                } else {
-                  currTs = nextTs;
-                }
-              });
-              newData = newData.map((xOrYArray) =>
-                xOrYArray.filter((_, index) => {
-                  return !indicesToDelete.has(index);
-                })
-              );
-            } else {
-              // If we're in windowed mode, we want to keep the last 1000 points
-              newData = newData.map((xOrYArray) =>
-                xOrYArray.slice(
-                  Math.max(0, xOrYArray.length - maximumDataPointsRef.current)
-                )
-              );
-            }
-          }
+          // Use the limitDataPoints utility function
+          newData = limitDataPoints(
+            newData,
+            maximumDataPointsRef.current,
+            windowed
+          );
 
           return newData;
         });
