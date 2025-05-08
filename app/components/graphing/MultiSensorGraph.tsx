@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "uplot/dist/uPlot.min.css";
 import { useIsDarkMode } from "~/hooks/useIsDarkMode";
-import { darkColors, lightColors } from "~/constants/colors";
+import { darkColors, lightColors } from "~/constants/graphLineColors";
 import { AutoResizeUPlotReact } from "~/components/graphing/AutoResizeUPlotReact";
 import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 import { limitDataPoints } from "~/util/limitDataPoints";
@@ -9,6 +9,7 @@ import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
 import { type ProducerData } from "~/types/producerData";
 import { MultiLinePlotData } from "~/types/Graphing";
 import { useProducerWebSocketConnectionBuffer } from "~/hooks/useProducerWebSocketConnectionBuffer";
+import { GraphStatisticsTable } from "~/components/graphing/GraphStatisticsTable";
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -304,58 +305,12 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
           >
             Reset zoom
           </button>
-          <h3 className="font-semibold mb-1 text-center text-sm">Statistics</h3>
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr className="bg-gray-100 dark:bg-gray-800">
-                <th className="py-2 px-2 text-left border border-gray-300 dark:border-gray-700">
-                  Producer
-                </th>
-                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                  Min
-                </th>
-                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                  Max
-                </th>
-                <th className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                  Avg
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {oneToTen.map((index) => {
-                // Get the color for this producer
-                const color = isDarkMode
-                  ? darkColors[index - 1]
-                  : lightColors[index - 1];
-                return (
-                  <tr
-                    key={`producer-${index}`}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-900"
-                  >
-                    <th className="py-2 px-2 text-left border border-gray-300 dark:border-gray-700 font-medium">
-                      <div className="flex items-center">
-                        <div
-                          className="w-2 h-2 rounded-full mr-1"
-                          style={{ backgroundColor: color }}
-                        ></div>
-                        P{index}
-                      </div>
-                    </th>
-                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                      {minimums?.[index - 1]?.toFixed(2) || "-"}
-                    </td>
-                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                      {maximums?.[index - 1]?.toFixed(2) || "-"}
-                    </td>
-                    <td className="py-2 px-2 text-right border border-gray-300 dark:border-gray-700">
-                      {averages?.[index - 1]?.toFixed(2) || "-"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <GraphStatisticsTable
+            minimums={minimums}
+            maximums={maximums}
+            averages={averages}
+            producerCount={10}
+          />
         </div>
       )}
     </div>
