@@ -1,4 +1,4 @@
-import { MultiLinePlotData } from "./convertMultiProducerDataToUPlotArrayAndAppend";
+import { MultiLinePlotData } from "~/types/Graphing";
 
 /**
  * Limits the number of data points in a multi-line plot dataset.

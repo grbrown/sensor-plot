@@ -1,6 +1,5 @@
-import type { ProducerData } from "~/components/graphing/MultiSensorGraph";
-
-export type MultiLinePlotData = number[][];
+import { MultiLinePlotData } from "~/types/Graphing";
+import { ProducerData } from "~/types/producerData";
 
 /**
  * Converts producer data to uPlot array format and appends it to the existing graph data.

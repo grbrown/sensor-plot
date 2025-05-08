@@ -1,8 +1,6 @@
-import {
-  convertMultiProducerDataToUPlotArrayAndAppend,
-  MultiLinePlotData,
-} from "../convertMultiProducerDataToUPlotArrayAndAppend";
-import type { ProducerData } from "~/components/graphing/MultiSensorGraph";
+import { ProducerData } from "~/types/producerData";
+import { convertMultiProducerDataToUPlotArrayAndAppend } from "../convertMultiProducerDataToUPlotArrayAndAppend";
+import { MultiLinePlotData } from "~/types/Graphing";
 
 describe("convertMultiProducerDataToUPlotArrayAndAppend", () => {
   beforeEach(() => {

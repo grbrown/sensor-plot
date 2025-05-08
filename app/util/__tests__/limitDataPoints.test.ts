@@ -1,5 +1,5 @@
+import { MultiLinePlotData } from "~/types/Graphing";
 import { limitDataPoints } from "../limitDataPoints";
-import { MultiLinePlotData } from "../convertMultiProducerDataToUPlotArrayAndAppend";
 
 describe("limitDataPoints", () => {
   // Create test data with 100 points

@@ -3,18 +3,11 @@ import "uplot/dist/uPlot.min.css";
 import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
 import { AutoResizeUPlotReact } from "~/components/graphing/AutoResizeUPlotReact";
-import {
-  convertMultiProducerDataToUPlotArrayAndAppend,
-  type MultiLinePlotData,
-} from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
+import { convertMultiProducerDataToUPlotArrayAndAppend } from "~/util/convertMultiProducerDataToUPlotArrayAndAppend";
 import { limitDataPoints } from "~/util/limitDataPoints";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
-
-export type SensorGraphProps = {
-  windowed?: boolean;
-};
-
-export type ProducerData = { timestamp: string; value: number };
+import { type ProducerData } from "~/types/producerData";
+import { MultiLinePlotData } from "~/types/Graphing";
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -27,12 +20,15 @@ const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   }
 };
 
+export type MultiSensorGraphProps = {
+  windowed?: boolean;
+};
 /**
  * Graph which connects to 10 producers and displays their data in a multi-line format.
  * Self limits datapoint count via `dataPointMaximum` localStorage value.
  * @param windowed - If true, the graph will display a time window of data points.
  */
-export function MultiSensorGraph({ windowed = false }: SensorGraphProps) {
+export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
