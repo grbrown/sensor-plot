@@ -29,6 +29,22 @@ export type MultiSensorGraphProps = {
  * @param windowed - If true, the graph will display a time window of data points.
  */
 export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
+  // Main graph data, initialized to 11 empty arrays, 10 data arrays for values and 1 time array for x-axis
+  const [graphData, setGraphData] = useState<MultiLinePlotData>([
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ]);
+
+  // Graph options setup
   const maximumDataPointsRef = useRef(DEFAULT_DATA_POINT_MAXIMUM);
   useEffect(() => {
     const storedMaxPoints = localStorage.getItem("dataPointMaximum");
@@ -46,21 +62,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
   // Track whether we're in a zoomed state
   const needsZoomReset = useRef(false);
 
-  const [graphData, setGraphData] = useState<MultiLinePlotData>([
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-  ]);
-
-  // Store the current scale state
+  // Store the current scale state (x axis zoom level)
   const scaleStateRef = useRef<{ min: number; max: number } | null>(null);
 
   const colorSchemeOptions = isDarkMode
@@ -161,6 +163,8 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
     )
   );
 
+  // Producer data buffers
+
   const producer1DataRef = useRef<ProducerData[]>([]);
   const producer2DataRef = useRef<ProducerData[]>([]);
   const producer3DataRef = useRef<ProducerData[]>([]);
@@ -172,6 +176,9 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
   const producer9DataRef = useRef<ProducerData[]>([]);
   const producer10DataRef = useRef<ProducerData[]>([]);
 
+  // Create WebSocket connections for each producer
+
+  // First producer is responsible for updating the graph, the rest just update their buffers
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/1`);
 
@@ -322,6 +329,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
 
   const plotData = zoomedData ?? graphData;
 
+  // Derived statistical data from zoomed plot
   const averages = zoomedData?.slice(1).map((arr) => {
     return arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
   });
