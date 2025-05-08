@@ -194,8 +194,10 @@ export function MultiSensorGraph({ windowed = false }: SensorGraphProps) {
         producer9DataRef.current,
         producer10DataRef.current,
       ];
+
+      // Check if all buffers have data
       if (!producersData.find((pd) => pd.length === 0)) {
-        const prod1StartLen = producer1DataRef.current.length;
+        //Find the least full buffer, extract that many points from each buffer
         const bufferMinLength = Math.min(
           ...producersData.map((pd) => pd.length)
         );
@@ -203,19 +205,14 @@ export function MultiSensorGraph({ windowed = false }: SensorGraphProps) {
         producersData.forEach((pd) => {
           bufferData.push(pd.splice(0, bufferMinLength));
         });
-        //todo: evaluate this code
-        const prod1EndLen = producer1DataRef.current.length;
-        if (prod1StartLen - bufferData[0].length !== prod1EndLen) {
-          console.error("diag- producer1 length mismatch");
-        }
+
+        //update graph with buffer points
         setGraphData((curr) => {
-          //todo factor into method
           var newData = convertMultiProducerDataToUPlotArrayAndAppend(
             bufferData,
             curr
           );
 
-          // Use the limitDataPoints utility function
           newData = limitDataPoints(
             newData,
             maximumDataPointsRef.current,
