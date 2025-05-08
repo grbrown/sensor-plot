@@ -8,6 +8,7 @@ import { limitDataPoints } from "~/util/limitDataPoints";
 import { DEFAULT_DATA_POINT_MAXIMUM } from "~/components/DataPointMaximum";
 import { type ProducerData } from "~/types/producerData";
 import { MultiLinePlotData } from "~/types/Graphing";
+import { useProducerWebSocketConnectionBuffer } from "~/hooks/useProducerWebSocketConnectionBuffer";
 
 const getGraphTitle = (windowed: boolean, maximumDataPointValue: number) => {
   if (windowed) {
@@ -164,17 +165,16 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
   );
 
   // Producer data buffers
-
-  const producer1DataRef = useRef<ProducerData[]>([]);
-  const producer2DataRef = useRef<ProducerData[]>([]);
-  const producer3DataRef = useRef<ProducerData[]>([]);
-  const producer4DataRef = useRef<ProducerData[]>([]);
-  const producer5DataRef = useRef<ProducerData[]>([]);
-  const producer6DataRef = useRef<ProducerData[]>([]);
-  const producer7DataRef = useRef<ProducerData[]>([]);
-  const producer8DataRef = useRef<ProducerData[]>([]);
-  const producer9DataRef = useRef<ProducerData[]>([]);
-  const producer10DataRef = useRef<ProducerData[]>([]);
+  const producer1DataBufferRef = useRef<ProducerData[]>([]);
+  const producer2DataBufferRef = useRef<ProducerData[]>([]);
+  const producer3DataBufferRef = useRef<ProducerData[]>([]);
+  const producer4DataBufferRef = useRef<ProducerData[]>([]);
+  const producer5DataBufferRef = useRef<ProducerData[]>([]);
+  const producer6DataBufferRef = useRef<ProducerData[]>([]);
+  const producer7DataBufferRef = useRef<ProducerData[]>([]);
+  const producer8DataBufferRef = useRef<ProducerData[]>([]);
+  const producer9DataBufferRef = useRef<ProducerData[]>([]);
+  const producer10DataBufferRef = useRef<ProducerData[]>([]);
 
   // Create WebSocket connections for each producer
 
@@ -184,18 +184,21 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
 
     socket.onmessage = (event) => {
       const dataArray = JSON.parse(event.data);
-      producer1DataRef.current = [...producer1DataRef.current, ...dataArray];
+      producer1DataBufferRef.current = [
+        ...producer1DataBufferRef.current,
+        ...dataArray,
+      ];
       const producersData = [
-        producer1DataRef.current,
-        producer2DataRef.current,
-        producer3DataRef.current,
-        producer4DataRef.current,
-        producer5DataRef.current,
-        producer6DataRef.current,
-        producer7DataRef.current,
-        producer8DataRef.current,
-        producer9DataRef.current,
-        producer10DataRef.current,
+        producer1DataBufferRef.current,
+        producer2DataBufferRef.current,
+        producer3DataBufferRef.current,
+        producer4DataBufferRef.current,
+        producer5DataBufferRef.current,
+        producer6DataBufferRef.current,
+        producer7DataBufferRef.current,
+        producer8DataBufferRef.current,
+        producer9DataBufferRef.current,
+        producer10DataBufferRef.current,
       ];
 
       // Check if all buffers have data
@@ -228,86 +231,16 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
     };
   }, []);
 
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/2`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer2DataRef.current = [...producer2DataRef.current, ...dataArray];
-    };
-  }, []);
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/3`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer3DataRef.current = [...producer3DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/4`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer4DataRef.current = [...producer4DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/5`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer5DataRef.current = [...producer5DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/6`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer6DataRef.current = [...producer6DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/7`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer7DataRef.current = [...producer7DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/8`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer8DataRef.current = [...producer8DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/9`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-      producer9DataRef.current = [...producer9DataRef.current, ...dataArray];
-    };
-  }, []);
-
-  useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/producer/10`);
-
-    socket.onmessage = (event) => {
-      const dataArray = JSON.parse(event.data);
-
-      producer10DataRef.current = [...producer10DataRef.current, ...dataArray];
-    };
-  }, []);
+  // Create WebSocket connections for each producer, these only update their buffers
+  useProducerWebSocketConnectionBuffer("2", producer2DataBufferRef);
+  useProducerWebSocketConnectionBuffer("3", producer3DataBufferRef);
+  useProducerWebSocketConnectionBuffer("4", producer4DataBufferRef);
+  useProducerWebSocketConnectionBuffer("5", producer5DataBufferRef);
+  useProducerWebSocketConnectionBuffer("6", producer6DataBufferRef);
+  useProducerWebSocketConnectionBuffer("7", producer7DataBufferRef);
+  useProducerWebSocketConnectionBuffer("8", producer8DataBufferRef);
+  useProducerWebSocketConnectionBuffer("9", producer9DataBufferRef);
+  useProducerWebSocketConnectionBuffer("10", producer10DataBufferRef);
 
   const zoomEnabled = scaleStateRef.current !== null;
   const zoomedData = (() => {
