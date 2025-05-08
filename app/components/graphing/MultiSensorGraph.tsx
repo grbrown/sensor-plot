@@ -110,7 +110,7 @@ export function MultiSensorGraph({ windowed = false }: MultiSensorGraphProps) {
             label: "Time",
           },
           ...oneToTen.map((i) => ({
-            label: "Value" + i,
+            label: "Producer " + i,
             points: { show: false },
             stroke: isDarkMode ? darkColors[i - 1] : lightColors[i - 1],
           })),
