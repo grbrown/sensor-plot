@@ -1,9 +1,12 @@
 # Multi Producer Graphing Application
 
-Web app for plotting real time data from producer web sockets. React Router/uPlot FE
+Web app for plotting real time data from producer web sockets. React Router/uPlot FE, Tailwind for styling, Jest/RTL testing
 
 - [React Router docs](https://reactrouter.com/)
 - [uPlot React docs](https://github.com/leeoniya/uplot-react)
+- [Tailwind docs](https://tailwindcss.com/)
+- [Jest docs](https://jestjs.io/docs/getting-started)
+- [React Testing Library Docs](https://testing-library.com/docs/react-testing-library/intro/)
 
 ## Getting Started
 
@@ -17,13 +20,13 @@ npm install
 
 ### Development
 
-Start the development server with HMR:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+The application will be available at `http://localhost:5173`.
 
 ### Testing
 
@@ -32,3 +35,7 @@ To run jest tests, use
 ```bash
 npm run test
 ```
+
+### Troubleshooting
+
+This was tested and should work with Node v22.12.0
