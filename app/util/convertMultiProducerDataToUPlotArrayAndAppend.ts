@@ -1,4 +1,4 @@
-import type { ProducerData } from "~/graphing/MultiSensorGraph";
+import type { ProducerData } from "~/components/graphing/MultiSensorGraph";
 
 export type MultiLinePlotData = number[][];
 

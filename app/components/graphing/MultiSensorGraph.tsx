@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "uplot/dist/uPlot.min.css";
 import { useIsDarkMode } from "~/hooks/useIsDarkMode";
 import { darkColors, lightColors } from "~/constants/colors";
-import { AutoResizeUPlotReact } from "~/components/AutoResizeUPlotReact";
+import { AutoResizeUPlotReact } from "~/components/graphing/AutoResizeUPlotReact";
 import {
   convertMultiProducerDataToUPlotArrayAndAppend,
   type MultiLinePlotData,
