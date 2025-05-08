@@ -1,5 +1,5 @@
-import { MultiSensorGraph } from "~/graphing/multi-sensor-graph";
+import { MultiSensorGraph } from "~/components/graphing/MultiSensorGraph";
 
 export default function MultiSensorLiveWindowed() {
-  return <MultiSensorGraph live={true} windowed={true} />;
+  return <MultiSensorGraph windowed={true} />;
 }

@@ -1,3 +1,6 @@
+/**
+ * Colors for dark mode
+ */
 export const darkColors = [
   "#00BFFF", // - Bright Blue
   "#FF8C00", // - Bright Orange
@@ -11,6 +14,9 @@ export const darkColors = [
   "#40E0D0", // - Turquoise
 ];
 
+/**
+ * Colors for light mode
+ */
 export const lightColors = [
   "#1F77B4", // - Blue
   "#FF7F0E", // - Orange
